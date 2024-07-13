@@ -78,7 +78,6 @@
 #drag-drop-zone {
     padding: 64px;
     border-radius: 16px;
-    margin: auto;
     box-shadow: 0;
     background-color: var(--primary-background-color);
 

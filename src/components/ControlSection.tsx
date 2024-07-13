@@ -201,7 +201,7 @@ export const InputFileZone = memo(function InputFileZone({
     return (
         <div
             id="drag-drop-zone"
-            className="vertical-layout flex-align-center flex-align-middle flex-self-center dash-border"
+            className="vertical-layout flex-align-center flex-align-middle dash-border"
             onDrop={handleDrop}
             onDragOver={(ev) => ev.preventDefault()}>
             <IconUpload

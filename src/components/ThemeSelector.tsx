@@ -43,7 +43,7 @@ const ThemeSelector = memo(function ThemeSelector() {
                 value="lighttheme"
                 id="light-option"
                 className="theme-option-radio"
-                defaultChecked
+                checked={!useDarkMode}
                 tabIndex={-1}
             />
             <label htmlFor="light-option" className="theme-option">
@@ -56,6 +56,7 @@ const ThemeSelector = memo(function ThemeSelector() {
                 value="darktheme"
                 id="dark-option"
                 className="theme-option-radio"
+                checked={useDarkMode}
                 tabIndex={-1}
             />
             <label htmlFor="dark-option" className="theme-option">

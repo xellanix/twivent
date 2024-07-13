@@ -1,6 +1,7 @@
 // IMPORT SECTION
 // node_modules
 import { useEffect, useState, memo } from "react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 // local components
 import ThemeSelector from "./ThemeSelector.tsx";
 import ControlSection, { InputFileZone, ProcessFileZone } from "./ControlSection.tsx";
@@ -57,7 +58,7 @@ function App() {
 
     return (
         <>
-            {loaded && (
+            {loaded ? (
                 <div
                     className="vertical-layout flex-fill"
                     style={{ rowGap: "calc(var(--section-gap-horizontal) * 1.5)" }}>
@@ -91,6 +92,8 @@ function App() {
                         </span>
                     </div>
                 </div>
+            ) : (
+                <DotLottieReact src="/airplane.lottie" autoplay loop />
             )}
 
             <FixedLayer />
