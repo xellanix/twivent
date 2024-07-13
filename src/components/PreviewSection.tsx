@@ -54,6 +54,7 @@ const makeImageCanvas = async (data: ImageData, signal: AbortSignal) => {
     return new Promise((resolve: (value: ImageCanvas) => void, reject) => {
         const img = new Image();
         img.src = source;
+        img.crossOrigin = "anonymous";
 
         img.onload = () => {
             if (signal.aborted) {

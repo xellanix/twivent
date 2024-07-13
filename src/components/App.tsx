@@ -93,7 +93,7 @@ function App() {
                     </div>
                 </div>
             ) : (
-                <DotLottieReact src="/airplane.lottie" autoplay loop />
+                <DotLottieReact src={`${import.meta.env.VITE_BASE_URL}airplane.lottie`} autoplay loop />
             )}
 
             <FixedLayer />
