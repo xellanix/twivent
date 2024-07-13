@@ -1,0 +1,23 @@
+.info-box {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	border-radius: var(--button-border-radius);
+	padding: 16px;
+	align-self: stretch;
+}
+
+.info-box-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--secondary-background-color);
+	width: 24px;
+	height: 24px;
+	border-radius: 32px;
+}
+
+.info-box * {
+    text-wrap: wrap;
+}

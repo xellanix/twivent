@@ -1,0 +1,142 @@
+.popup {
+	--popup-padding: 24px;
+
+	min-width: clamp(350px, 40dvw, 100%);
+	max-width: calc(100dvw - 64px);
+	max-height: 85dvh;
+	background-color: var(--secondary-background-color);
+	border-radius: 16px;
+	overflow: clip;
+	padding: var(--popup-padding);
+	padding-bottom: calc(var(--popup-padding) * 2);
+	box-sizing: border-box;
+
+	transform: scale(0);
+
+	transition: height 300ms ease-out;
+}
+.hide-all .popup {
+    animation-name: zoomIn;
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+    animation-fill-mode: forwards;
+}
+.popup.out {
+    animation-name: zoomOut;
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+    animation-fill-mode: forwards;
+}
+
+#popup-container {
+	overflow: auto;
+}
+
+@keyframes zoomIn {
+	0% {
+		transform: scale(0);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+@keyframes zoomOut {
+	0% {
+		transform: scale(1);
+	}
+	100% {
+		transform: scale(0);
+	}
+}
+
+.popup .icon-landscape {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	align-self: center;
+	flex: 1 1 0;
+	color: inherit;
+	margin-left: calc(var(--section-gap-horizontal) + 40px);
+}
+.popup .icon-landscape > img {
+	height: 24px;
+}
+.popup .icon-landscape > div {
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.popup .default-back-button + .icon-landscape {
+	margin-left: initial;
+}
+
+.default-back-button, .default-close-button {
+	width: 40px;
+	height: 40px;
+	cursor: pointer;
+	padding: 0 !important;
+	background: transparent !important;
+}
+.default-back-button {
+	align-self: flex-start;
+}
+.default-close-button {
+	align-self: flex-end;
+}
+
+.popup-content {
+	padding-left: var(--popup-padding);
+	padding-right: var(--popup-padding);
+	overflow: initial;
+}
+
+.popup .icon-landscape, .popup-content h2 {
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.popup-content form,
+.popup-content button,
+.popup-content > div,
+.popup-content > div > * {
+	width: 100%;
+}
+
+.popup-content form > * {
+	box-sizing: border-box;
+	width: 100%;
+}
+
+.popup-content .separator {
+	overflow: hidden;
+	width: 100%;
+	text-align: center;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	
+	-webkit-user-select: none;
+	user-select: none;
+}
+.popup-content .separator::before,
+.popup-content .separator::after {
+	background-color: var(--ternary-background-color2);
+	content: "";
+	display: inline-flex;
+	height: 2px;
+	position: relative;
+	justify-content: center;
+	align-items: center;
+	width: 50%;
+}
+.popup-content .separator::before {
+	right: 0.5em;
+	margin-left: -50%;
+}
+.popup-content .separator::after {
+	left: 0.5em;
+	margin-right: -50%;
+}

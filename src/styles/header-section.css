@@ -1,0 +1,91 @@
+#header-stick-watcher {
+    margin-bottom: calc(var(--content-gap) * -1);
+    top: var(--content-gap);
+    position: absolute;
+}
+
+header {
+    display: flex;
+    flex-direction: row;
+    align-self: stretch;
+    flex: 1 1 0;
+    padding: var(--navigation-root-padding-vertical) 0px;
+    position: sticky;
+    top: 0;
+    gap: var(--navigation-gap);
+    
+    background-color: var(--primary-background-color);
+    margin-left: calc(var(--navigation-root-padding-vertical) * -1.5);
+    padding-left: calc(var(--navigation-root-padding-vertical) * 1.5);
+    margin-right: calc(var(--navigation-root-padding-vertical) * -1.5);
+    padding-right: calc(var(--navigation-root-padding-vertical) * 1.5);
+    
+    border-radius: 0px 0px 16px 16px;
+    z-index: 100;
+}
+header.on-stick {
+    box-shadow: 0px 0px 42px 0px rgba(0, 0, 0, .125);
+}
+header.hambar-opened {
+    border-radius: 0px;
+}
+
+.icon-landscape {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--icon-gap);
+    align-self: stretch;
+    flex: 1 1 0;
+}
+.icon-landscape > a {
+    margin: 0px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--icon-gap);
+    align-self: stretch;
+    text-decoration: none !important;
+    color: inherit;
+}
+.icon-landscape > a > img {
+    height: var(--icon-height);
+}
+.icon-landscape > a > div {
+    font-size: var(--icon-text-size);
+    font-weight: var(--icon-text-weight);
+}
+
+header .button {
+    font-size: min(var(--navigation-text-size), var(--button-font-size));
+    border-radius: 8px;
+}
+
+.hamburger-button {
+    display: none;
+}
+.hamburger-button div {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.hamburger-button svg {
+    max-width: 24px;
+    max-height: 24px;
+}
+.hamburger-button .hambar path {
+    fill: var(--text-color);
+}
+
+.hambar-opened ~ #smoke-layer {
+    visibility: visible;
+}
+@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+    .hambar-opened ~ #smoke-layer {
+        background-color: rgba(0, 0, 0, .35);
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+    }
+}

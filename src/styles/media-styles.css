@@ -1,0 +1,139 @@
+@media (min-width: 1601px) {
+    body {
+        --content-max-width: 1400px;
+        --icon-gap: 16px;
+        --icon-height: 48px;
+        --icon-text-size: 36px;
+        --icon-text-weight: 700;
+        --navigation-root-padding-vertical: 32px;
+        --navigation-gap: 32px;
+        --navigation-text-size: 16px;
+        --navigation-padding-horizontal: 16px;
+        --navigation-padding-vertical: 12px;
+        --h1-font-size: 48px;
+        --h2-font-size: 36px;
+        --h3-font-size: 28px;
+        --h4-font-size: 24px;
+        --h5-font-size: 20px;
+        --h6-font-size: 32px;
+        --p-font-size: 24px;
+        --section-gap-vertical: 24px;
+        --section-gap-horizontal: 64px;
+        --button-font-size: 20px;
+    }
+
+    body > .body-wrapper {
+        padding: 48px 0 !important;
+    }
+}
+
+@media (max-width: 1600px) {
+    body {
+        --content-max-width: 1150px;
+        --navigation-text-size: 16px;
+        
+        --h1-font-size: 42px;
+        --h2-font-size: 32px;
+        --h3-font-size: 24px;
+        --h4-font-size: 20px;
+        --h6-font-size: 28px;
+        --p-font-size: 20px;
+        --section-gap-vertical: 20px;
+        --section-gap-horizontal: 48px;
+        --button-font-size: 20px;
+    }
+
+    body > .body-wrapper {
+        padding: 48px 0 !important;
+    }
+}
+
+@media (max-width: 1400px) {
+    body {
+        --content-max-width: 950px;
+        --icon-height: 42px;
+        --icon-text-size: 32px;
+        --navigation-root-padding-vertical: 24px;
+        --navigation-gap: 20px;
+        --navigation-text-size: 16px;
+        --navigation-padding-horizontal: 14px;
+        --navigation-padding-vertical: 10px;
+
+        --h1-font-size: 36px;
+        --h2-font-size: 28px;
+        --h3-font-size: 22px;
+        --h5-font-size: 16px;
+        --h6-font-size: 24px;
+        --button-font-size: 16px;
+    }
+}
+
+@media (max-width: 1100px) {
+    body {
+        --content-max-width: 800px;
+        --icon-gap: 12px;
+        --navigation-root-padding-vertical: 20px;
+        --navigation-gap: 16px;
+
+        --h1-font-size: 28px;
+        --h2-font-size: 22px;
+        --h3-font-size: 20px;
+        --h4-font-size: 16px;
+        --h5-font-size: 14px;
+        --h6-font-size: 20px;
+        --p-font-size: 16px;
+        --section-gap-vertical: 12px;
+        --section-gap-horizontal: 36px;
+        --button-font-size: 14px;
+        --button-padding-vertical: 14px;
+        --button-padding-horizontal: 20px;
+        --button-border-radius: 8px;
+    }
+}
+
+@media (max-width: 860px) {
+    body {
+        --content-max-width: 600px;
+        --content-gap: clamp(40px, calc(100dvh * 0.168421053), 80px);
+        --icon-gap: 8px;
+        --icon-height: 36px;
+        --icon-text-size: 28px;
+        --navigation-gap: 12px;
+        --navigation-text-size: 16px;
+        --navigation-padding-horizontal: 14px;
+        --navigation-padding-vertical: 14px;
+    }
+
+    #preview-section {
+        margin: 0 auto !important;
+    }
+}
+
+@media (max-width: 700px) {
+    body {
+        --content-gap: 80px;
+        --icon-gap: 8px;
+        --icon-height: 32px;
+        --icon-text-size: 24px;
+        --icon-text-weight: 700;
+        --navigation-root-padding-vertical: 16px;
+    }
+
+    body > .body-wrapper {
+        padding: 48px 48px 96px !important;
+    }
+    
+    #theme-selector {
+        --selector-label-gap: 8px;
+        --selector-label-icon: 16px;
+        --selector-label-text: 40px;
+    }
+
+    #fixed-container {
+        width: calc(100% - 48px * 2) !important;
+    }
+    
+    #drag-drop-zone {
+        padding: 32px;
+    }
+}
