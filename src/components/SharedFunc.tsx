@@ -1,9 +1,44 @@
 import { Position } from "./SharedTypes";
 
-export const twibbonWidth = 1080;
-export const twibbonHeight = 1080;
 export const controllerWidth = 250;
-export const twibbonSource = "/twibbon/orkess3/layer1.png";
+
+export let twibbon = {
+    width: 1080,
+    height: 1080,
+    sources: [""]
+};
+
+export const getLatestTwibbonFolder = async () => {
+    // Access all twibbon from github
+    // https://api.github.com/repos/xellanix/twivent/contents/public/twibbon?ref=main
+
+    const response = await fetch(
+        "https://api.github.com/repos/xellanix/twivent/contents/public/twibbon?ref=main"
+    );
+    const data: Array<any> = await response.json();
+
+    const last = data.filter((item: { type: string }) => item.type === "dir").pop();
+
+    const url: string = last.url;
+
+    return url;
+};
+
+export const getAllLayers = async (folder: string) => {
+    const response = await fetch(folder);
+    const data: Array<any> = await response.json();
+
+    const mapped = data
+        .filter((item: { type: string }) => item.type === "file")
+        .map((item: { download_url: string }) => item.download_url);
+
+    return mapped;
+};
+
+export const getAllLatestTwibbonLayers = async () => {
+    const folder = await getLatestTwibbonFolder();
+    return getAllLayers(folder);
+}
 
 export const getCenterPos = (
     scale: number,

@@ -3,7 +3,10 @@
 import { memo, useRef, useEffect, useCallback } from "react";
 // local components
 import { Position } from "./SharedTypes.tsx";
-import { getCenterPos, twibbonWidth, twibbonHeight, twibbonSource } from "./SharedFunc.tsx";
+import {
+    getCenterPos,
+    twibbon,
+} from "./SharedFunc.tsx";
 // assets
 // local assets
 // styles
@@ -83,13 +86,13 @@ const PreviewSection = memo(function PreviewSection({
     const backCanvasRef = useRef<HTMLCanvasElement>(null);
 
     let images: ImageData[] = [
-        {
-            src: twibbonSource,
+        ...(twibbon.sources.map((src) => ({
+            src,
             pos: { x: 0, y: 0 },
-            w: twibbonWidth,
-            h: twibbonHeight,
+            w: twibbon.width,
+            h: twibbon.height,
             cover: false,
-        },
+        } as ImageData))),
         ...(image ? [{ ...image, cover: true }] : []),
     ];
 

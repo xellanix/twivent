@@ -5,14 +5,14 @@ import { IconX, IconReload, IconArrowsMove, IconUpload } from "@tabler/icons-rea
 import { AspectRatio } from "react-aspect-ratio";
 // local components
 import { Position } from "./SharedTypes.tsx";
-import { getCenterPos, twibbonWidth, twibbonHeight, controllerWidth } from "./SharedFunc.tsx";
+import { getCenterPos, controllerWidth, twibbon } from "./SharedFunc.tsx";
 // assets
 // local assets
 // styles
 import "react-aspect-ratio/aspect-ratio.css";
 
-const controllerHeight = (controllerWidth * twibbonHeight) / twibbonWidth;
-const controllerScale = twibbonWidth / controllerWidth;
+const controllerHeight = (controllerWidth * twibbon.height) / twibbon.width;
+const controllerScale = twibbon.width / controllerWidth;
 let controllerCenterPos: Position = { x: 0, y: 0 };
 
 const setControllerSizePos = (src: string, canvas: HTMLElement, scale: number) => {
