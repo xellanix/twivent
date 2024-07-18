@@ -5,7 +5,11 @@ export const controllerWidth = 250;
 export let twibbon = {
     width: 1080,
     height: 1080,
-    sources: [""]
+    sources: ["", ""] as unknown,
+} as {
+    width: number;
+    height: number;
+    sources: Map<string, string>;
 };
 
 export const getLatestTwibbonFolder = async () => {
@@ -28,17 +32,25 @@ export const getAllLayers = async (folder: string) => {
     const response = await fetch(folder);
     const data: Array<any> = await response.json();
 
-    const mapped = data
-        .filter((item: { type: string }) => item.type === "file")
-        .map((item: { download_url: string }) => item.download_url);
+    const reduced = data.reduce<Array<[string, string]>>(
+        (filtered, item: { name: string; type: string; download_url: string }) => {
+            const filename = item.name.match(/^[^.]+/);
 
-    return mapped;
+            if (filename && item.type === "file")
+                return filtered.concat([[filename[0], item.download_url]]);
+
+            return filtered;
+        },
+        []
+    );
+
+    return new Map(reduced);
 };
 
 export const getAllLatestTwibbonLayers = async () => {
     const folder = await getLatestTwibbonFolder();
     return getAllLayers(folder);
-}
+};
 
 export const getCenterPos = (
     scale: number,

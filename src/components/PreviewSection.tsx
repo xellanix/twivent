@@ -86,16 +86,30 @@ const PreviewSection = memo(function PreviewSection({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const backCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    let images: ImageData[] = [
-        ...(twibbon.sources.map((src) => ({
-            src,
-            pos: { x: 0, y: 0 },
-            w: twibbon.width,
-            h: twibbon.height,
-            cover: false,
-        } as ImageData))),
-        ...(image ? [{ ...image, cover: true }] : []),
-    ];
+    let images: ImageData[] = [];
+    let hasUserPictureLayer = false;
+
+    for (let i = 0; i < twibbon.sources.size; i++) {
+        const layer = twibbon.sources.get(`layer${i + 1}`);
+        if (layer) {
+            images.push({
+                src: layer!,
+                pos: { x: 0, y: 0 },
+                w: twibbon.width,
+                h: twibbon.height,
+                cover: false,
+            });
+        }
+        else {
+            if (image) {
+                images.push({...image, cover: true});
+                hasUserPictureLayer = true;
+            }
+        }
+    }
+
+    if (!hasUserPictureLayer && image)
+        images.push({...image, cover: true});
 
     useEffect(() => {
         const controller = new AbortController();
