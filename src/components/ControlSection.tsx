@@ -10,6 +10,7 @@ import { getCenterPos, controllerWidth, twibbon } from "./SharedFunc.tsx";
 // local assets
 // styles
 import "react-aspect-ratio/aspect-ratio.css";
+import InfoBox, { InfoStatus } from "./InfoBox.tsx";
 
 const controllerHeight = (controllerWidth * twibbon.height) / twibbon.width;
 const controllerScale = twibbon.width / controllerWidth;
@@ -133,11 +134,40 @@ const resetValue = <S,>(setter: React.Dispatch<React.SetStateAction<S>>, default
     setter(defaultValue);
 };
 
+type ErrorMessage = {
+    error: string;
+};
+
+const getAllowedFile = (files: FileList) => {
+    if (files.length === 0) {
+        return { error: "No file is dropped" } as ErrorMessage;
+    }
+    let droppedFiles = Array.from(files).filter((file) => {
+        const fn = file.name;
+        return fn.endsWith(".png") || fn.endsWith(".jpg") || fn.endsWith(".jpeg");
+    });
+
+    if (droppedFiles.length === 0) {
+        return { error: "File is not supported" } as ErrorMessage;
+    }
+
+    droppedFiles = droppedFiles.filter((file) => file.size <= 1024 * 1024 * 10);
+
+    if (droppedFiles.length === 0) {
+        return { error: "File size is too large" } as ErrorMessage;
+    }
+
+    return droppedFiles[0];
+};
+
 export const InputFileZone = memo(function InputFileZone({
     setFile: setFile,
 }: {
     setFile: React.Dispatch<React.SetStateAction<File | null>>;
 }) {
+    const [infoType, setInfoType] = useState<InfoStatus>(InfoStatus.Error);
+    const [infoMessage, setInfoMessage] = useState<string | null>(null);
+
     const selectFile = useCallback(async () => {
         return new Promise((resolve: (value: File | null) => void, reject) => {
             const input = document.createElement("input");
@@ -174,59 +204,71 @@ export const InputFileZone = memo(function InputFileZone({
     const handleDrop = useCallback(
         (ev: React.DragEvent) => {
             ev.preventDefault();
-            let droppedFiles = Array.from(ev.dataTransfer.files).filter(
-                (file) =>
-                    file.name.endsWith(".png") ||
-                    file.name.endsWith(".jpg") ||
-                    file.name.endsWith(".jpeg")
-            );
+            const file = getAllowedFile(ev.dataTransfer.files);
 
-            if (droppedFiles.length === 0) {
-                console.log("File not supported");
-                return;
+            if (file instanceof File) {
+                setInfoType(InfoStatus.Success);
+                setInfoMessage("The file is ready to be processed");
+
+                setTimeout(() => {
+                    setFile(file as File);
+                }, 1000);
+            } else {
+                setInfoType(InfoStatus.Error);
+                setInfoMessage((file as ErrorMessage).error);
             }
-
-            droppedFiles = droppedFiles.filter((file) => file.size <= 1024 * 1024 * 10);
-
-            if (droppedFiles.length === 0) {
-                console.log("File too big");
-                return;
-            }
-
-            setFile(droppedFiles[0] ?? null);
         },
         [setFile]
     );
 
     return (
-        <div
-            id="drag-drop-zone"
-            className="vertical-layout flex-align-center flex-align-middle dash-border"
-            onDrop={handleDrop}
-            onDragOver={(ev) => ev.preventDefault()}>
-            <IconUpload
-                color="var(--text-color)"
-                style={{
-                    width: "calc(var(--button-font-size) * 3) !important",
-                    height: "calc(var(--button-font-size) * 3) !important",
-                    marginBottom: "var(--section-gap-vertical) !important",
+        <>
+            {infoMessage && <InfoBox status={infoType}>{infoMessage}</InfoBox>}
+            <div
+                id="drag-drop-zone"
+                className="vertical-layout flex-align-center flex-align-middle dash-border"
+                onDrop={handleDrop}
+                onDragOver={(ev) => ev.preventDefault()}
+                onDragEnter={(ev) => {
+                    ev.preventDefault();
+                    ev.currentTarget.classList.add("dragover");
                 }}
-            />
-            <h4 className="text-align-center">Drag and Drop File Here</h4>
-            <div className="text-separator">or</div>
-            <div className="wrapper-only">
-                <button type="button" className="button accent" onClick={browseFileClicked}>
-                    Browse File
-                </button>
-            </div>
-            <br />
-            <div className="text-align-center">
-                Supported formats:
+                onDragLeave={(ev) => {
+                    ev.preventDefault();
+                    ev.currentTarget.classList.remove("dragover");
+                }}>
+                <IconUpload
+                    color="var(--text-color)"
+                    style={{
+                        width: "calc(var(--button-font-size) * 3) !important",
+                        height: "calc(var(--button-font-size) * 3) !important",
+                        marginBottom: "var(--section-gap-vertical) !important",
+                    }}
+                />
+                <h4 className="text-align-center">Drag and Drop File Here</h4>
+                <div className="text-separator">or</div>
+                <div className="wrapper-only">
+                    <button type="button" className="button accent" onClick={browseFileClicked}>
+                        Browse File
+                    </button>
+                </div>
                 <br />
-                .png, .jpg, .jpeg
+                <div
+                    className="horizontal-layout vertical-gap2x flex-align-center"
+                    style={{ flexWrap: "wrap" }}>
+                    <div className="text-align-center">
+                        Supported formats:
+                        <br />
+                        .png, .jpg, .jpeg
+                    </div>
+                    <div className="text-align-center">
+                        Max file size:
+                        <br />
+                        10MB
+                    </div>
+                </div>
             </div>
-            <div className="text-align-center">Max file size: 10MB</div>
-        </div>
+        </>
     );
 });
 

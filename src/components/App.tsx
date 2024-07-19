@@ -7,10 +7,7 @@ import ThemeSelector from "./ThemeSelector.tsx";
 import ControlSection, { InputFileZone, ProcessFileZone } from "./ControlSection.tsx";
 import PreviewSection from "./PreviewSection.tsx";
 import { Position } from "./SharedTypes.tsx";
-import {
-    getAllLatestTwibbonLayers,
-    twibbon,
-} from "./SharedFunc.tsx";
+import { getAllLatestTwibbonLayers, twibbon } from "./SharedFunc.tsx";
 // assets
 // local assets
 // styles
@@ -68,12 +65,14 @@ function App() {
                     <main
                         className="horizontal-container-layout flex-align-top"
                         style={{ margin: "auto 0" }}>
-                        <PreviewSection
-                            image={file ? { src: file, pos: imagePos, w: 0, h: 0 } : null}
-                            width={twibbon.width}
-                            height={twibbon.height}
-                            scale={imageScale}
-                        />
+                        {file && (
+                            <PreviewSection
+                                image={file ? { src: file, pos: imagePos, w: 0, h: 0 } : null}
+                                width={twibbon.width}
+                                height={twibbon.height}
+                                scale={imageScale}
+                            />
+                        )}
                         <ControlSection step={step}>
                             <InputFileZone setFile={setFile} />
                             <ProcessFileZone
@@ -93,7 +92,11 @@ function App() {
                     </div>
                 </div>
             ) : (
-                <DotLottieReact src={`${import.meta.env.VITE_BASE_URL}airplane.lottie`} autoplay loop />
+                <DotLottieReact
+                    src={`${import.meta.env.VITE_BASE_URL}airplane.lottie`}
+                    autoplay
+                    loop
+                />
             )}
 
             <FixedLayer />
