@@ -37,8 +37,23 @@ function App() {
 
     const [step, setStep] = useState(0);
     const [loaded, setLoaded] = useState(false);
+    const [title, setTitle] = useState<string | null>("Title");
+    const [subtitle, setSubtitle] = useState<string | null>(null);
 
     getAllLatestTwibbonLayers().then((_layers) => {
+        if (_layers.has("metadata")) {
+            fetch(_layers.get("metadata")!)
+                .then((res) => res.json())
+                .then((metadata) => {
+                    _layers.delete("metadata");
+
+                    setTitle(metadata.title);
+                    setSubtitle(metadata.subtitle);
+
+                    twibbon.width = metadata.width;
+                    twibbon.height = metadata.height;
+                });
+        }
         twibbon.sources = _layers;
         setLoaded(true);
     });
@@ -59,8 +74,17 @@ function App() {
                 <div
                     className="vertical-layout flex-fill"
                     style={{ rowGap: "calc(var(--section-gap-horizontal) * 1.5)" }}>
-                    <div className="vertical-layout flex-align-center flex-align-bottom flex-fill">
-                        <h2 className="text-align-center">Twibbon OrKeSS 3.0</h2>
+                    <div
+                        className="vertical-layout flex-align-center flex-align-bottom flex-fill"
+                        style={{ gap: "calc(var(--section-gap-vertical) * .5)" }}>
+                        {title && <h2 className="text-align-center">{title}</h2>}
+                        {subtitle && (
+                            <h4
+                                className="text-align-center"
+                                style={{ color: "var(--accent-color)" }}>
+                                {subtitle}
+                            </h4>
+                        )}
                     </div>
                     <main
                         className="horizontal-container-layout flex-align-top"

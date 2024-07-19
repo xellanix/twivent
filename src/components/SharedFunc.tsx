@@ -16,9 +16,7 @@ export const getLatestTwibbonFolder = async () => {
     // Access all twibbon from github
     // https://api.github.com/repos/xellanix/twivent/contents/public/twibbon?ref=main
 
-    const response = await fetch(
-        "https://api.github.com/repos/xellanix/twivent/contents/public/twibbon?ref=main"
-    );
+    const response = await fetch("https://api.github.com/repos/xellanix/twiproj/contents?ref=main");
     const data: Array<any> = await response.json();
 
     const last = data.filter((item: { type: string }) => item.type === "dir").pop();
@@ -49,7 +47,7 @@ export const getAllLayers = async (folder: string) => {
 
 export const getAllLatestTwibbonLayers = async () => {
     const folder = await getLatestTwibbonFolder();
-    return getAllLayers(folder);
+    return await getAllLayers(folder);
 };
 
 export const getCenterPos = (
