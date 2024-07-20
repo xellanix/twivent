@@ -1,30 +1,23 @@
-# React + TypeScript + Vite
+# TwiVent
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The simple way to combine the twibbon with your photo. Just need to upload a photo, set the size and position, then it is ready to use.
 
-Currently, two official plugins are available:
+[Try Now][0]
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## :question: QnA
 
-## Expanding the ESLint configuration
+### How do I make my twibbon usable by the public?
+- To make twibbon available for public use, make sure you are a contributor to the [TwiProj][1] repository, so you can upload your twibbon there. So then, the system will automatically use the last twibbon on the list.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+### How can I use the desired twibbon based on the folder name?
+- To be able to use a particular twibbon (not using an automatic system), you need the folder name of the desired twibbon, which is found in the [TwiProj][1] repository. Then applied as below.
+```
+https://xellanix.github.com/twivent/{TWIBBON_FOLDER_NAME}
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+## :sparkles: Addition
+- If you need additional information regarding managing folders and files related to the twibbon, please check the TwiProj [README][2]
+
+[0]: https://xellanix.github.io/twivent
+[1]: https://github.com/xellanix/twiproj
+[2]: https://github.com/xellanix/twiproj/tree/main#twiproj
