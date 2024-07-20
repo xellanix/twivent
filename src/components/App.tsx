@@ -1,13 +1,13 @@
 // IMPORT SECTION
 // node_modules
-import { useEffect, useState, memo } from "react";
+import { useEffect, useState, memo, useCallback } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 // local components
 import ThemeSelector from "./ThemeSelector.tsx";
 import ControlSection, { InputFileZone, ProcessFileZone } from "./ControlSection.tsx";
 import PreviewSection from "./PreviewSection.tsx";
 import { Position } from "./SharedTypes.tsx";
-import { getAllLatestTwibbonLayers, twibbon } from "./SharedFunc.tsx";
+import { getAllLatestTwibbonLayers, getAllLayers, twibbon } from "./SharedFunc.tsx";
 // assets
 // local assets
 // styles
@@ -40,7 +40,12 @@ function App() {
     const [title, setTitle] = useState<string | null>("Title");
     const [subtitle, setSubtitle] = useState<string | null>(null);
 
-    getAllLatestTwibbonLayers().then((_layers) => {
+    let folder = window.location.pathname;
+    if (folder.startsWith("/twivent/")) {
+        folder = folder.substring(9);
+    } else folder = folder.substring(1);
+
+    const processFiles = useCallback((_layers: Map<string, string>) => {
         if (_layers.has("metadata")) {
             fetch(_layers.get("metadata")!)
                 .then((res) => res.json())
@@ -56,7 +61,13 @@ function App() {
         }
         twibbon.sources = _layers;
         setLoaded(true);
-    });
+    }, [setTitle, setSubtitle, setLoaded]);
+
+    folder
+        ? getAllLayers(
+              `https://api.github.com/repos/xellanix/twiproj/contents/${folder}?ref=main`
+          ).then(processFiles)
+        : getAllLatestTwibbonLayers().then(processFiles);
 
     useEffect(() => {
         if (file) {

@@ -89,7 +89,7 @@ const PreviewSection = memo(function PreviewSection({
     let images: ImageData[] = [];
     let hasUserPictureLayer = false;
 
-    for (let i = 0; i < twibbon.sources.size; i++) {
+    for (let i = 0; i < twibbon.totalLayer; i++) {
         const layer = twibbon.sources.get(`layer${i + 1}`);
         if (layer) {
             images.push({

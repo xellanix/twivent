@@ -6,10 +6,12 @@ export let twibbon = {
     width: 1080,
     height: 1080,
     sources: ["", ""] as unknown,
+    totalLayer: 0,
 } as {
     width: number;
     height: number;
     sources: Map<string, string>;
+    totalLayer: number;
 };
 
 export const getLatestTwibbonFolder = async () => {
@@ -34,8 +36,14 @@ export const getAllLayers = async (folder: string) => {
         (filtered, item: { name: string; type: string; download_url: string }) => {
             const filename = item.name.match(/^[^.]+/);
 
-            if (filename && item.type === "file")
-                return filtered.concat([[filename[0], item.download_url]]);
+            if (filename && item.type === "file") {
+                const fn = filename[0];
+                
+                const int = parseInt(fn.replace(/\D/g, ""), 10);
+                if (!isNaN(int) && int > twibbon.totalLayer) twibbon.totalLayer = int;
+
+                return filtered.concat([[fn, item.download_url]]);
+            }
 
             return filtered;
         },
