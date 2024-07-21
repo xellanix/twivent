@@ -40,16 +40,17 @@ function App() {
     const [title, setTitle] = useState<string | null>("Title");
     const [subtitle, setSubtitle] = useState<string | null>(null);
 
-    let folder = window.location.pathname;
-    if (folder.startsWith("/twivent/")) {
-        folder = folder.substring(9);
-    } else folder = folder.substring(1);
+    // Get the URL parameters from the current window location
+    let folder = new URLSearchParams(window.location.search).get("twiproj");
 
-    const processFiles = useCallback(({ title, subtitle }: { title: string; subtitle: string }) => {
-        setTitle(title);
-        setSubtitle(subtitle);
-        setLoaded(true);
-    }, [setTitle, setSubtitle, setLoaded]);
+    const processFiles = useCallback(
+        ({ title, subtitle }: { title: string; subtitle: string }) => {
+            setTitle(title);
+            setSubtitle(subtitle);
+            setLoaded(true);
+        },
+        [setTitle, setSubtitle, setLoaded]
+    );
 
     folder
         ? getAllLayersWithRaw(folder).then(processFiles)
@@ -108,7 +109,7 @@ function App() {
                     </main>
                     <div className="vertical-layout flex-align-center flex-align-top flex-fill">
                         <span className="text-align-center">
-                            Twivent, made with love by DA02-XSTIA23
+                            Twivent (v{import.meta.env.VITE_APP_VER}{folder && "f"}), made with love by DA02-XSTIA23
                         </span>
                     </div>
                 </div>

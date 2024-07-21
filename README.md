@@ -17,9 +17,12 @@ There are two methods of using twibbon:
 ### 2. Based on the twibbon folder name (Recommended)
 - In this method, the user needs to enter the name of the desired twibbon folder into the default TwiVent link, so the result will be like the one below. The twibbon folder name is obtained from the [TwiProj] repository.
 ```
-https://xellanix.github.com/twivent/{TWIBBON_FOLDER_NAME}
+https://xellanix.github.io/twivent/?twiproj={TWIBBON_FOLDER_NAME}
 ```
 > [!IMPORTANT]
+> Replace the {TWIBBON_FOLDER_NAME} with the folder name.
+
+> [!NOTE]
 > Using the this method can provide benefits in the form of:
 > 1. Ensure users use the right twibbon.
 > 2. Avoid access limitation problems.
