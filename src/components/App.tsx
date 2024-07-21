@@ -7,7 +7,7 @@ import ThemeSelector from "./ThemeSelector.tsx";
 import ControlSection, { InputFileZone, ProcessFileZone } from "./ControlSection.tsx";
 import PreviewSection from "./PreviewSection.tsx";
 import { Position } from "./SharedTypes.tsx";
-import { getAllLatestTwibbonLayers, getAllLayers, twibbon } from "./SharedFunc.tsx";
+import { getAllLatestTwibbonLayers, getAllLayersWithRaw, twibbon } from "./SharedFunc.tsx";
 // assets
 // local assets
 // styles
@@ -45,28 +45,14 @@ function App() {
         folder = folder.substring(9);
     } else folder = folder.substring(1);
 
-    const processFiles = useCallback((_layers: Map<string, string>) => {
-        if (_layers.has("metadata")) {
-            fetch(_layers.get("metadata")!)
-                .then((res) => res.json())
-                .then((metadata) => {
-                    _layers.delete("metadata");
-
-                    setTitle(metadata.title);
-                    setSubtitle(metadata.subtitle);
-
-                    twibbon.width = metadata.width;
-                    twibbon.height = metadata.height;
-                });
-        }
-        twibbon.sources = _layers;
+    const processFiles = useCallback(({ title, subtitle }: { title: string; subtitle: string }) => {
+        setTitle(title);
+        setSubtitle(subtitle);
         setLoaded(true);
     }, [setTitle, setSubtitle, setLoaded]);
 
     folder
-        ? getAllLayers(
-              `https://api.github.com/repos/xellanix/twiproj/contents/${folder}?ref=main`
-          ).then(processFiles)
+        ? getAllLayersWithRaw(folder).then(processFiles)
         : getAllLatestTwibbonLayers().then(processFiles);
 
     useEffect(() => {
