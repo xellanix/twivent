@@ -5,14 +5,13 @@ import { IconX, IconReload, IconArrowsMove, IconUpload } from "@tabler/icons-rea
 import { AspectRatio } from "react-aspect-ratio";
 // local components
 import { Position } from "./SharedTypes.tsx";
-import { getCenterPos, controllerWidth, twibbon } from "./SharedFunc.tsx";
+import { makePreview, getCenterPos, controllerWidth, controllerHeight, twibbon, delay } from "./SharedFunc.tsx";
+import InfoBox, { InfoStatus } from "./InfoBox.tsx";
 // assets
 // local assets
 // styles
 import "react-aspect-ratio/aspect-ratio.css";
-import InfoBox, { InfoStatus } from "./InfoBox.tsx";
 
-const controllerHeight = (controllerWidth * twibbon.height) / twibbon.width;
 const controllerScale = twibbon.width / controllerWidth;
 let controllerCenterPos: Position = { x: 0, y: 0 };
 
@@ -26,7 +25,7 @@ const setControllerSizePos = (src: string, canvas: HTMLElement, scale: number) =
                 scale,
                 true,
                 controllerWidth,
-                controllerHeight,
+                controllerHeight(),
                 temp.width,
                 temp.height
             );
@@ -40,35 +39,6 @@ const setControllerSizePos = (src: string, canvas: HTMLElement, scale: number) =
         };
     });
 };
-
-function makePreview(src: File, min: number) {
-    return new Promise<string>((resolve, reject) => {
-        // create a temp image to get the size
-        const temp = new Image();
-        temp.src = URL.createObjectURL(src);
-        temp.onload = () => {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-
-            if (ctx) {
-                if (temp.width < temp.height) {
-                    canvas.width = min;
-                    canvas.height = (min * temp.height) / temp.width;
-                } else {
-                    canvas.width = (min * temp.width) / temp.height;
-                    canvas.height = min;
-                }
-                ctx.drawImage(temp, 0, 0, canvas.width, canvas.height);
-
-                URL.revokeObjectURL(temp.src);
-                resolve(canvas.toDataURL("image/png"));
-            }
-
-            URL.revokeObjectURL(temp.src);
-            reject;
-        };
-    });
-}
 
 const dragElement = (
     el: HTMLElement,
@@ -210,9 +180,7 @@ export const InputFileZone = memo(function InputFileZone({
                 setInfoType(InfoStatus.Success);
                 setInfoMessage("The file is ready to be processed");
 
-                setTimeout(() => {
-                    setFile(file as File);
-                }, 1000);
+                delay(1000).then(() => setFile(file as File));
             } else {
                 setInfoType(InfoStatus.Error);
                 setInfoMessage((file as ErrorMessage).error);
@@ -381,7 +349,7 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                     id="image-controller"
                     style={{
                         width: `${controllerWidth}px`,
-                        height: `${controllerHeight}px`,
+                        height: `${controllerHeight()}px`,
                         position: "relative",
                         overflow: "hidden",
                         borderRadius: "16px",
@@ -414,9 +382,7 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                         onClick={(ev) => {
                             const el = ev.currentTarget;
                             el.classList.add("hide");
-                            setTimeout(() => {
-                                el.style.display = "none";
-                            }, 133);
+                            delay(133).then(() => el.style.display = "none");
                         }}>
                         <IconArrowsMove
                             color="var(--text-color)"

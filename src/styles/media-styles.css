@@ -1,5 +1,7 @@
 @media (min-width: 1601px) {
     body {
+        --airplane-max-width: 40dvw;
+
         --content-max-width: 1400px;
         --icon-gap: 16px;
         --icon-height: 48px;
@@ -29,6 +31,8 @@
 
 @media (max-width: 1600px) {
     body {
+        --airplane-max-width: 40dvw;
+
         --content-max-width: 1150px;
         --navigation-text-size: 16px;
         
@@ -93,6 +97,8 @@
 
 @media (max-width: 860px) {
     body {
+        --airplane-max-width: 80dvw;
+
         --content-max-width: 600px;
         --content-gap: clamp(40px, calc(100dvh * 0.168421053), 80px);
         --icon-gap: 8px;

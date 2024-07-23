@@ -7,7 +7,9 @@ import ThemeSelector from "./ThemeSelector.tsx";
 import ControlSection, { InputFileZone, ProcessFileZone } from "./ControlSection.tsx";
 import PreviewSection from "./PreviewSection.tsx";
 import { Position } from "./SharedTypes.tsx";
-import { getAllLatestTwibbonLayers, getAllLayersWithRaw, twibbon } from "./SharedFunc.tsx";
+import { delay, getAllLatestTwibbonLayers, getAllLayersWithRaw, pageUrl, twibbon } from "./SharedFunc.tsx";
+import ProgressBar from "./ProgressBar.tsx";
+import AnalizeImage from "./AnalizeImage.tsx";
 // assets
 // local assets
 // styles
@@ -40,6 +42,10 @@ function App() {
     const [title, setTitle] = useState<string | null>("Title");
     const [subtitle, setSubtitle] = useState<string | null>(null);
 
+    const [loadProgress, setLoadProgress] = useState(0);
+    const [loadMax, setLoadMax] = useState(0);
+    const [loadMessage, setLoadMessage] = useState("Loading...");
+
     // Get the URL parameters from the current window location
     let folder = new URLSearchParams(window.location.search).get("twiproj");
 
@@ -47,14 +53,20 @@ function App() {
         ({ title, subtitle }: { title: string; subtitle: string }) => {
             setTitle(title);
             setSubtitle(subtitle);
-            setLoaded(true);
         },
         [setTitle, setSubtitle, setLoaded]
     );
 
-    folder
-        ? getAllLayersWithRaw(folder).then(processFiles)
-        : getAllLatestTwibbonLayers().then(processFiles);
+    useEffect(() => {
+        const getLayers = folder
+            ? getAllLayersWithRaw(folder, setLoadProgress, setLoadMax, setLoadMessage)
+            : getAllLatestTwibbonLayers();
+
+        getLayers
+            .then(processFiles)
+            .then(() => delay(1000))
+            .then(() => setLoaded(true));
+    }, []);
 
     useEffect(() => {
         if (file) {
@@ -87,9 +99,9 @@ function App() {
                     <main
                         className="horizontal-container-layout flex-align-top"
                         style={{ margin: "auto 0" }}>
-                        {file && (
+                        {step === 2 && (
                             <PreviewSection
-                                image={file ? { src: file, pos: imagePos, w: 0, h: 0 } : null}
+                                image={file ? { src: file!, pos: imagePos, w: 0, h: 0 } : null}
                                 width={twibbon.width}
                                 height={twibbon.height}
                                 scale={imageScale}
@@ -97,6 +109,7 @@ function App() {
                         )}
                         <ControlSection step={step}>
                             <InputFileZone setFile={setFile} />
+                            <AnalizeImage file={file!} setImageScale={setImageScale} setStep={setStep} />
                             <ProcessFileZone
                                 file={file}
                                 setFile={setFile}
@@ -109,16 +122,23 @@ function App() {
                     </main>
                     <div className="vertical-layout flex-align-center flex-align-top flex-fill">
                         <span className="text-align-center">
-                            Twivent (v{import.meta.env.VITE_APP_VER}{folder && "f"}), made with love by DA02-XSTIA23
+                            Twivent (v{import.meta.env.VITE_APP_VER}
+                            {folder && "f"}), made with love by DA02-XSTIA23
                         </span>
                     </div>
                 </div>
             ) : (
-                <DotLottieReact
-                    src={`${import.meta.env.VITE_BASE_URL}airplane.lottie`}
-                    autoplay
-                    loop
-                />
+                <div className="vertical-layout flex-align-center">
+                    <DotLottieReact
+                        src={`${pageUrl()}airplane.lottie`}
+                        autoplay
+                        loop
+                        style={{ width: "var(--airplane-max-width)" }}
+                    />
+                    {folder && (
+                        <ProgressBar value={loadProgress} max={loadMax} message={loadMessage} />
+                    )}
+                </div>
             )}
 
             <FixedLayer />

@@ -5,7 +5,10 @@ type TwibbonHeader = {
     subtitle: string;
 };
 
+export const pageUrl = () => window.location.origin + window.location.pathname;
+
 export const controllerWidth = 250;
+export const controllerHeight = () => (controllerWidth * twibbon.height) / twibbon.width;
 
 export let twibbon = {
     width: 1080,
@@ -77,29 +80,39 @@ export const getAllLayers = async (folder: string): Promise<TwibbonHeader> => {
 
 export const getAllLatestTwibbonLayers = async () => {
     const folderData = await getLatestTwibbonFolder();
-    return await getAllLayersWithRaw(folderData[0]);
+    return getAllLayersWithRaw(folderData[0]);
 };
 
-export const getAllLayersWithRaw = async (folder: string): Promise<TwibbonHeader> => {
+export const getAllLayersWithRaw = async (folder: string, progressHandler?: any, maxHandler?: any, messageHandler?: any): Promise<TwibbonHeader> => {
     // https://raw.githubusercontent.com/xellanix/twiproj/main/orkess3/layer1.png
 
+    messageHandler("Fetching metadata...");
     const metadata = await (
         await fetch(
             `https://raw.githubusercontent.com/xellanix/twiproj/main/${folder}/metadata.json`
         )
     ).json();
     const totalLayer = metadata.lastLayerIndex;
-
+    maxHandler((prev: number) => prev + 1 + totalLayer * 3);
+    progressHandler((prev: number) => prev + 1);
+    
     const getStatus = async (i: number) => {
         const url = `https://raw.githubusercontent.com/xellanix/twiproj/main/${folder}/layer${i}`;
-        const png = await fetch(`${url}.png`);
-        if (png.ok) return `${url}.png`;
+        try {
+            messageHandler(`Fetching layer ${i}...`);
 
-        const jpg = await fetch(`${url}.jpg`);
-        if (jpg.ok) return `${url}.jpg`;
+            const png = await fetch(`${url}.png`);
+            progressHandler((prev: number) => prev + 3 - (!png.ok ? 2 : 0));
+            if (png.ok) return `${url}.png`;
 
-        const jpeg = await fetch(`${url}.jpeg`);
-        if (jpeg.ok) return `${url}.jpeg`;
+            const jpg = await fetch(`${url}.jpg`);
+            progressHandler((prev: number) => prev + 2 - (!jpg.ok ? 1 : 0));
+            if (jpg.ok) return `${url}.jpg`;
+
+            const jpeg = await fetch(`${url}.jpeg`);
+            progressHandler((prev: number) => prev + 1);
+            if (jpeg.ok) return `${url}.jpeg`;
+        } catch {}
 
         return null;
     };
@@ -118,6 +131,35 @@ export const getAllLayersWithRaw = async (folder: string): Promise<TwibbonHeader
 
     return { title: metadata.title, subtitle: metadata.subtitle };
 };
+
+export function makePreview(src: File, min: number) {
+    return new Promise<string>((resolve, reject) => {
+        // create a temp image to get the size
+        const temp = new Image();
+        temp.src = URL.createObjectURL(src);
+        temp.onload = () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            if (ctx) {
+                if (temp.width < temp.height) {
+                    canvas.width = min;
+                    canvas.height = (min * temp.height) / temp.width;
+                } else {
+                    canvas.width = (min * temp.width) / temp.height;
+                    canvas.height = min;
+                }
+                ctx.drawImage(temp, 0, 0, canvas.width, canvas.height);
+
+                URL.revokeObjectURL(temp.src);
+                resolve(canvas.toDataURL("image/png"));
+            }
+
+            URL.revokeObjectURL(temp.src);
+            reject;
+        };
+    });
+}
 
 export const getCenterPos = (
     scale: number,
@@ -155,3 +197,5 @@ export const getCenterPos = (
         imageSize,
     };
 };
+
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

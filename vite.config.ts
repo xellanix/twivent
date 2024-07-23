@@ -9,4 +9,7 @@ export default defineConfig({
 		minify: true,
 		assetsInlineLimit: 0,
 	},
+	worker: {
+		format: "es",
+	},
 });

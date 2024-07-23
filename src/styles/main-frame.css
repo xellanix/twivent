@@ -78,6 +78,8 @@ html {
 }
 
 body {
+	--airplane-max-width: 40dvw;
+	
 	--content-max-width: 1400px;
 	--content-gap: clamp(80px, calc(100dvh * 0.168421053), 160px);
 
