@@ -7,8 +7,14 @@ import ThemeSelector from "./ThemeSelector.tsx";
 import ControlSection, { InputFileZone, ProcessFileZone } from "./ControlSection.tsx";
 import PreviewSection from "./PreviewSection.tsx";
 import { Position } from "./SharedTypes.tsx";
-import { delay, getAllLatestTwibbonLayers, getAllLayersWithRaw, pageUrl, twibbon } from "./SharedFunc.tsx";
-import ProgressBar from "./ProgressBar.tsx";
+import {
+    delay,
+    getAllLatestTwibbonLayers,
+    getAllLayersWithRaw,
+    pageUrl,
+    twibbon,
+} from "./SharedFunc.tsx";
+import ProgressBar, { Progress } from "./ProgressBar.tsx";
 import AnalizeImage from "./AnalizeImage.tsx";
 // assets
 // local assets
@@ -33,33 +39,43 @@ const FixedLayer = memo(function FixedLayer() {
 });
 
 function App() {
+    const [folder, setFolder] = useState<string | null>(null);
     const [file, setFile] = useState<File | null>(null);
     const [imageScale, setImageScale] = useState(100);
     const [imagePos, setImagePos] = useState<Position>({ x: 0, y: 0 });
-
-    const [step, setStep] = useState(0);
-    const [loaded, setLoaded] = useState(false);
     const [title, setTitle] = useState<string | null>("Title");
     const [subtitle, setSubtitle] = useState<string | null>(null);
 
-    const [loadProgress, setLoadProgress] = useState(0);
-    const [loadMax, setLoadMax] = useState(0);
+    const [step, setStep] = useState(0);
+    const [loaded, setLoaded] = useState(false);
+    const [loadProgress, setLoadProgress] = useState<Progress>({ current: 0, max: 0 });
     const [loadMessage, setLoadMessage] = useState("Loading...");
-
-    // Get the URL parameters from the current window location
-    let folder = new URLSearchParams(window.location.search).get("twiproj");
 
     const processFiles = useCallback(
         ({ title, subtitle }: { title: string; subtitle: string }) => {
             setTitle(title);
             setSubtitle(subtitle);
         },
-        [setTitle, setSubtitle, setLoaded]
+        [setTitle, setSubtitle]
+    );
+
+    const updateProgress = useCallback(
+        (current?: number, max?: number) => {
+            setLoadProgress((prev: Progress) => ({
+                current: prev.current + (current ?? 0),
+                max: prev.max + (max ?? 0),
+            }));
+        },
+        [setLoadProgress]
     );
 
     useEffect(() => {
-        const getLayers = folder
-            ? getAllLayersWithRaw(folder, setLoadProgress, setLoadMax, setLoadMessage)
+        // Get the URL parameters from the current window location
+        let _folder = new URLSearchParams(window.location.search).get("twiproj");
+        setFolder(_folder);
+
+        const getLayers = _folder
+            ? getAllLayersWithRaw(_folder, updateProgress, setLoadMessage)
             : getAllLatestTwibbonLayers();
 
         getLayers
@@ -109,7 +125,12 @@ function App() {
                         )}
                         <ControlSection step={step}>
                             <InputFileZone setFile={setFile} />
-                            <AnalizeImage file={file!} setImageScale={setImageScale} setStep={setStep} />
+                            <AnalizeImage
+                                file={file!}
+                                setImageScale={setImageScale}
+                                setImagePos={setImagePos}
+                                setStep={setStep}
+                            />
                             <ProcessFileZone
                                 file={file}
                                 setFile={setFile}
@@ -135,8 +156,8 @@ function App() {
                         loop
                         style={{ width: "var(--airplane-max-width)" }}
                     />
-                    {folder && (
-                        <ProgressBar value={loadProgress} max={loadMax} message={loadMessage} />
+                    {loadProgress.max > 0 && (
+                        <ProgressBar progress={loadProgress} message={loadMessage} />
                     )}
                 </div>
             )}

@@ -1,12 +1,9 @@
 // IMPORT SECTION
 // node_modules
-import { memo, useRef, useEffect, useCallback } from "react";
+import { memo, useRef, useEffect, useCallback, useState } from "react";
 // local components
 import { Position } from "./SharedTypes.tsx";
-import {
-    getCenterPos,
-    twibbon,
-} from "./SharedFunc.tsx";
+import { delay, getCenterPos, twibbon } from "./SharedFunc.tsx";
 // assets
 // local assets
 // styles
@@ -86,30 +83,35 @@ const PreviewSection = memo(function PreviewSection({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const backCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    let images: ImageData[] = [];
-    let hasUserPictureLayer = false;
+    const [copyStatus, setCopyStatus] = useState<string | null>(null);
+    const [images, setImages] = useState<ImageData[]>([]);
 
-    for (let i = 0; i < twibbon.totalLayer; i++) {
-        const layer = twibbon.sources.get(`layer${i + 1}`);
-        if (layer) {
-            images.push({
-                src: layer!,
-                pos: { x: 0, y: 0 },
-                w: twibbon.width,
-                h: twibbon.height,
-                cover: false,
-            });
-        }
-        else {
-            if (image) {
-                images.push({...image, cover: true});
-                hasUserPictureLayer = true;
+    useEffect(() => {
+        let hasUserPictureLayer = false;
+        let _images: ImageData[] = [];
+
+        for (let i = 0; i < twibbon.totalLayer; i++) {
+            const layer = twibbon.sources.get(`layer${i + 1}`);
+            if (layer) {
+                _images.push({
+                    src: layer!,
+                    pos: { x: 0, y: 0 },
+                    w: twibbon.width,
+                    h: twibbon.height,
+                    cover: false,
+                });
+            } else {
+                if (image) {
+                    _images.push({ ...image, cover: true });
+                    hasUserPictureLayer = true;
+                }
             }
         }
-    }
+    
+        if (!hasUserPictureLayer && image) _images.push({ ...image, cover: true });
 
-    if (!hasUserPictureLayer && image)
-        images.push({...image, cover: true});
+        setImages(_images);
+    }, [image]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -157,7 +159,7 @@ const PreviewSection = memo(function PreviewSection({
                 ctx?.drawImage(backCanvas!, 0, 0);
             } catch (e: any | string) {
                 if (e !== "aborted") {
-                    console.log(e);
+                    console.error(e);
                 }
             }
         };
@@ -167,7 +169,7 @@ const PreviewSection = memo(function PreviewSection({
         return () => {
             controller.abort();
         };
-    }, [image, width, height, scale]);
+    }, [images, width, height, scale]);
 
     const downloadImage = useCallback(() => {
         const canvas = canvasRef.current;
@@ -177,6 +179,25 @@ const PreviewSection = memo(function PreviewSection({
             a.href = dataURL;
             a.download = "twivent.png";
             a.click();
+        }
+    }, []);
+
+    const copyCaption = useCallback(async () => {
+        try {
+            const caption = twibbon.caption || "Test";
+            if (!caption) return;
+
+            // Copy to clipboard
+            await navigator.clipboard.writeText(caption!);
+
+            setCopyStatus("success");
+            await delay(1000);
+            //setCopyStatus(null);
+        } catch (err) {
+            // Failed to copy
+            setCopyStatus("error");
+            await delay(1000);
+            setCopyStatus(null);
         }
     }, []);
 
@@ -196,9 +217,28 @@ const PreviewSection = memo(function PreviewSection({
             }}>
             <canvas ref={canvasRef} width={width} height={height} style={{ width: "100%" }} />
             <canvas ref={backCanvasRef} width={width} height={height} style={{ display: "none" }} />
-            <div className="wrapper-only">
-                <button type="button" className="button accent" onClick={downloadImage}>
+            <div className="wrapper-only" style={{ flexDirection: "row" }}>
+                <button
+                    type="button"
+                    className="button accent"
+                    onClick={downloadImage}
+                    style={{ height: "100%" }}>
                     Download
+                </button>
+                <button
+                    type="button"
+                    className={`button ${copyStatus && copyStatus}`}
+                    onClick={copyCaption}
+                    style={{
+                        height: "100%",
+                        color: "var(--accent-button-text-color)",
+                        transition: "background-color 200ms ease-out",
+                    }}>
+                    {copyStatus === "success"
+                        ? "Copied!"
+                        : copyStatus === "error"
+                        ? "Failed to copy!"
+                        : "Caption"}
                 </button>
             </div>
         </div>

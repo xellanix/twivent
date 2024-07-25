@@ -7,19 +7,30 @@ type TwibbonHeader = {
 
 export const pageUrl = () => window.location.origin + window.location.pathname;
 
-export const controllerWidth = 250;
-export const controllerHeight = () => (controllerWidth * twibbon.height) / twibbon.width;
+export let controllerData: {
+    width: number;
+    height: number;
+    scale: number;
+    centerPoint: Position;
+} = {
+    width: 250,
+    height: 250,
+    scale: 1,
+    centerPoint: { x: 0, y: 0 },
+};
 
 export let twibbon = {
     width: 1080,
     height: 1080,
     sources: ["", ""] as unknown,
     totalLayer: 0,
+    caption: null,
 } as {
     width: number;
     height: number;
     sources: Map<string, string>;
     totalLayer: number;
+    caption: string | null;
 };
 
 export const getLatestTwibbonFolder = async () => {
@@ -69,6 +80,8 @@ export const getAllLayers = async (folder: string): Promise<TwibbonHeader> => {
     const metadata = await (await fetch(metadataUrl)).json();
     twibbon.width = metadata.width;
     twibbon.height = metadata.height;
+    controllerData.height = (controllerData.width * twibbon.height) / twibbon.width;
+    controllerData.scale = twibbon.width / controllerData.width;
 
     twibbon.sources = new Map(reduced);
 
@@ -83,7 +96,11 @@ export const getAllLatestTwibbonLayers = async () => {
     return getAllLayersWithRaw(folderData[0]);
 };
 
-export const getAllLayersWithRaw = async (folder: string, progressHandler?: any, maxHandler?: any, messageHandler?: any): Promise<TwibbonHeader> => {
+export const getAllLayersWithRaw = async (
+    folder: string,
+    progressHandler?: (current?: number, max?: number) => void,
+    messageHandler?: any
+): Promise<TwibbonHeader> => {
     // https://raw.githubusercontent.com/xellanix/twiproj/main/orkess3/layer1.png
 
     messageHandler("Fetching metadata...");
@@ -93,24 +110,24 @@ export const getAllLayersWithRaw = async (folder: string, progressHandler?: any,
         )
     ).json();
     const totalLayer = metadata.lastLayerIndex;
-    maxHandler((prev: number) => prev + 1 + totalLayer * 3);
-    progressHandler((prev: number) => prev + 1);
-    
+
+    progressHandler && progressHandler(1, 1 + totalLayer * 3);
+
     const getStatus = async (i: number) => {
         const url = `https://raw.githubusercontent.com/xellanix/twiproj/main/${folder}/layer${i}`;
         try {
             messageHandler(`Fetching layer ${i}...`);
 
             const png = await fetch(`${url}.png`);
-            progressHandler((prev: number) => prev + 3 - (!png.ok ? 2 : 0));
+            progressHandler && progressHandler(3 - (!png.ok ? 2 : 0));
             if (png.ok) return `${url}.png`;
 
             const jpg = await fetch(`${url}.jpg`);
-            progressHandler((prev: number) => prev + 2 - (!jpg.ok ? 1 : 0));
+            progressHandler && progressHandler(2 - (!jpg.ok ? 1 : 0));
             if (jpg.ok) return `${url}.jpg`;
 
             const jpeg = await fetch(`${url}.jpeg`);
-            progressHandler((prev: number) => prev + 1);
+            progressHandler && progressHandler(1);
             if (jpeg.ok) return `${url}.jpeg`;
         } catch {}
 
@@ -128,6 +145,8 @@ export const getAllLayersWithRaw = async (folder: string, progressHandler?: any,
     twibbon.height = metadata.height;
     twibbon.sources = mapped;
     twibbon.totalLayer = totalLayer;
+    controllerData.height = (controllerData.width * twibbon.height) / twibbon.width;
+    controllerData.scale = twibbon.width / controllerData.width;
 
     return { title: metadata.title, subtitle: metadata.subtitle };
 };

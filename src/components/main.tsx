@@ -4,6 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 // local components
 import App from "./App.tsx";
+import PopupProvider from "./Popup.tsx";
 // assets
 // local assets
 // styles
@@ -20,6 +21,8 @@ import "../styles/media-styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
-        <App />
+        <PopupProvider iconSrc={`${import.meta.env.VITE_BASE_URL}icon.svg`} iconText="Twivent">
+            <App />
+        </PopupProvider>
     </React.StrictMode>
 );

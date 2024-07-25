@@ -79,13 +79,3 @@ header .button {
     fill: var(--text-color);
 }
 
-.hambar-opened ~ #smoke-layer {
-    visibility: visible;
-}
-@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
-    .hambar-opened ~ #smoke-layer {
-        background-color: rgba(0, 0, 0, .35);
-        -webkit-backdrop-filter: blur(8px);
-        backdrop-filter: blur(8px);
-    }
-}

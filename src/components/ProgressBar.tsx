@@ -1,12 +1,15 @@
 import { useId } from "react";
 
+export type Progress = {
+    current: number;
+    max: number;
+}
+
 export default function ProgressBar({
-    value = 0,
-    max,
+    progress,
     message,
 }: {
-    value?: number;
-    max: number;
+    progress: Progress;
     message?: string;
 }) {
     const id = useId();
@@ -35,7 +38,7 @@ export default function ProgressBar({
                 <div
                     style={{
                         position: "absolute",
-                        width: `${(value / max) * 100}%`,
+                        width: `${(progress.current / progress.max) * 100}%`,
                         height: "100%",
                         backgroundColor: "var(--accent-color)",
                         borderRadius: "9999px",
@@ -45,7 +48,7 @@ export default function ProgressBar({
             </div>
             {typeof message !== "undefined" && (
                 <label htmlFor={`progress-bar-${id}`} style={{ fontSize: "var(--h4-font-size)" }}>
-                    {value === max && max !== 0 ? "Done!" : message}
+                    {progress.current === progress.max && progress.max !== 0 ? "Done!" : message}
                 </label>
             )}
         </div>
