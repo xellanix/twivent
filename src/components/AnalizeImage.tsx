@@ -38,20 +38,61 @@ const analyzeScalePos = (
     face: FaceData
 ): [number, Position] => {
     let downscaleFactor: number = 0;
-    let cappedSize: number = 1;
+    let cappedWidth: number = 1;
+    let cappedHeight: number = 1;
 
     if (imageWidth < imageHeight) {
         downscaleFactor = imageWidth / controllerData.width;
+        // (cis * canvas.height) / canvas.width;
+        cappedHeight = imageHeight / imageWidth;
     } else {
         downscaleFactor = imageHeight / controllerData.height;
-        cappedSize = imageWidth / imageHeight;
+        // (cis * canvas.width) / canvas.height
+        cappedWidth = imageWidth / imageHeight;
     }
 
     const imageToFace = downscaleFactor / face.height;
 
-    const faceFactor = controllerData.height * imageToFace;
-    const faceScale = Math.round(faceFactor * 100);
+    let faceFactor = controllerData.height * imageToFace;
 
+    // cis = controllerData.width * faceFactor
+    cappedWidth *= controllerData.width * faceFactor;
+    cappedHeight *= controllerData.height * faceFactor;
+    // cappedWidth / canvas.width
+    const analyzeScale = cappedWidth / imageWidth;
+
+    let finalLeft = face.x * analyzeScale;
+    let finalTop = face.y * analyzeScale;
+
+    // Check if the final size is bigger than the canvas
+    if (face.width > imageWidth) {
+        // Get the ratio and fit the final width to the canvas
+        // ratio = (face.width * (cappedWidth / imageWidth)) / cappedWidth
+        const ratio = face.width / imageWidth;
+
+        faceFactor = 1;
+
+        finalLeft = 0;
+        finalTop /= ratio;
+    } else if (face.height > imageHeight) {
+        // Get the ratio and fit the final height to the canvas
+        // ratio = (face.height * (cappedHeight / imageHeight)) / cappedHeight
+        const ratio = face.height / imageHeight;
+
+        faceFactor = 1;
+
+        finalLeft /= ratio;
+        finalTop = 0;
+    }
+
+    // Check the position is outside the canvas
+    if (finalLeft < 0) {
+        finalLeft = 0;
+    } else if (finalTop < 0) {
+        finalTop = 0;
+    }
+
+    const faceScale = Math.round(faceFactor * 100);
     const { imagePosition } = getCenterPos(
         faceScale,
         true,
@@ -60,14 +101,6 @@ const analyzeScalePos = (
         imageWidth / downscaleFactor,
         imageHeight / downscaleFactor
     );
-
-    // cis = controllerData.width * faceFactor
-    cappedSize *= controllerData.width * faceFactor;
-    // cappedSize / canvas.width
-    const analyzeScale = cappedSize / imageWidth;
-
-    const finalLeft = face.x * analyzeScale;
-    const finalTop = face.y * analyzeScale;
 
     const posX = imagePosition.x + finalLeft;
     const posY = imagePosition.y + finalTop;
@@ -102,7 +135,7 @@ export default function AnalizeImage({
                 if (faceScale <= 500) {
                     const posX = Math.round(-controllerData.scale * facePos.x);
                     const posY = Math.round(-controllerData.scale * facePos.y);
-    
+
                     setImagePos({ x: posX, y: posY });
                     setImageScale(faceScale);
                 }
