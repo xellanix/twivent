@@ -1,36 +1,45 @@
-import { Position } from "./SharedTypes";
+import { Position, ReplacementParams } from "./SharedTypes";
 
 type TwibbonHeader = {
     title: string;
     subtitle: string;
 };
 
-export const pageUrl = () => window.location.origin + window.location.pathname;
+type Caption = {
+    template: string;
+    params: ReplacementParams;
+};
 
-export let controllerData: {
+type TwibbonData = {
+    width: number;
+    height: number;
+    sources: Map<string, string> | null;
+    totalLayer: number;
+    caption: Caption | null;
+};
+
+type ControllerData = {
     width: number;
     height: number;
     scale: number;
     centerPoint: Position;
-} = {
+};
+
+export const pageUrl = () => window.location.origin + window.location.pathname;
+
+export let controllerData: ControllerData = {
     width: 250,
     height: 250,
     scale: 1,
     centerPoint: { x: 0, y: 0 },
 };
 
-export let twibbon = {
+export let twibbon: TwibbonData = {
     width: 1080,
     height: 1080,
-    sources: ["", ""] as unknown,
+    sources: null,
     totalLayer: 0,
     caption: null,
-} as {
-    width: number;
-    height: number;
-    sources: Map<string, string>;
-    totalLayer: number;
-    caption: string | null;
 };
 
 export const getLatestTwibbonFolder = async () => {
@@ -80,6 +89,7 @@ export const getAllLayers = async (folder: string): Promise<TwibbonHeader> => {
     const metadata = await (await fetch(metadataUrl)).json();
     twibbon.width = metadata.width;
     twibbon.height = metadata.height;
+    twibbon.caption = metadata.caption ?? null;
     controllerData.height = (controllerData.width * twibbon.height) / twibbon.width;
     controllerData.scale = twibbon.width / controllerData.width;
 
@@ -109,6 +119,14 @@ export const getAllLayersWithRaw = async (
             `https://raw.githubusercontent.com/xellanix/twiproj/main/${folder}/metadata.json`
         )
     ).json();
+
+    twibbon.width = metadata.width;
+    twibbon.height = metadata.height;
+    twibbon.caption = metadata.caption ?? null;
+
+    controllerData.height = (controllerData.width * twibbon.height) / twibbon.width;
+    controllerData.scale = twibbon.width / controllerData.width;
+
     const totalLayer = metadata.lastLayerIndex;
 
     progressHandler && progressHandler(1, 1 + totalLayer * 3);
@@ -141,12 +159,8 @@ export const getAllLayersWithRaw = async (
         status && mapped.set(`layer${i + 1}`, status);
     }
 
-    twibbon.width = metadata.width;
-    twibbon.height = metadata.height;
     twibbon.sources = mapped;
     twibbon.totalLayer = totalLayer;
-    controllerData.height = (controllerData.width * twibbon.height) / twibbon.width;
-    controllerData.scale = twibbon.width / controllerData.width;
 
     return { title: metadata.title, subtitle: metadata.subtitle };
 };

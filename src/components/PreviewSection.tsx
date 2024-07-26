@@ -3,7 +3,9 @@
 import { memo, useRef, useEffect, useCallback, useState } from "react";
 // local components
 import { Position } from "./SharedTypes.tsx";
-import { delay, getCenterPos, twibbon } from "./SharedFunc.tsx";
+import { getCenterPos, twibbon } from "./SharedFunc.tsx";
+import { usePopup } from "./Popup.tsx";
+import CaptionPopup from "./popups/CaptionPopup.tsx";
 // assets
 // local assets
 // styles
@@ -83,15 +85,16 @@ const PreviewSection = memo(function PreviewSection({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const backCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    const [copyStatus, setCopyStatus] = useState<string | null>(null);
     const [images, setImages] = useState<ImageData[]>([]);
+
+    const popup = usePopup();
 
     useEffect(() => {
         let hasUserPictureLayer = false;
         let _images: ImageData[] = [];
 
         for (let i = 0; i < twibbon.totalLayer; i++) {
-            const layer = twibbon.sources.get(`layer${i + 1}`);
+            const layer = twibbon.sources!.get(`layer${i + 1}`);
             if (layer) {
                 _images.push({
                     src: layer!,
@@ -182,23 +185,9 @@ const PreviewSection = memo(function PreviewSection({
         }
     }, []);
 
-    const copyCaption = useCallback(async () => {
-        try {
-            const caption = twibbon.caption || "Test";
-            if (!caption) return;
-
-            // Copy to clipboard
-            await navigator.clipboard.writeText(caption!);
-
-            setCopyStatus("success");
-            await delay(1000);
-            //setCopyStatus(null);
-        } catch (err) {
-            // Failed to copy
-            setCopyStatus("error");
-            await delay(1000);
-            setCopyStatus(null);
-        }
+    const loadCaption = useCallback(async () => {
+        popup.setItem(<CaptionPopup />);
+        popup.setIsOpen(true);
     }, []);
 
     return (
@@ -225,21 +214,16 @@ const PreviewSection = memo(function PreviewSection({
                     style={{ height: "100%" }}>
                     Download
                 </button>
-                <button
+                {twibbon.caption && <button
                     type="button"
-                    className={`button ${copyStatus && copyStatus}`}
-                    onClick={copyCaption}
+                    className={`button`}
+                    onClick={loadCaption}
                     style={{
                         height: "100%",
                         color: "var(--accent-button-text-color)",
-                        transition: "background-color 200ms ease-out",
                     }}>
-                    {copyStatus === "success"
-                        ? "Copied!"
-                        : copyStatus === "error"
-                        ? "Failed to copy!"
-                        : "Caption"}
-                </button>
+                    Caption
+                </button>}
             </div>
         </div>
     );
