@@ -83,18 +83,22 @@ const dragElement = (
         pos3 = clientX;
         pos4 = clientY;
         // set the element's new position:
-        const top = el.offsetTop - centerPos.y - pos2;
-        const left = el.offsetLeft - centerPos.x - pos1;
+        const top = el.offsetTop - pos2;
+        const left = el.offsetLeft - pos1;
 
-        const scale = controllerData.scale;
-        setPosition({
-            x: Math.round(left * scale),
-            y: Math.round(top * scale),
-        });
+        el.style.top = `${top}px`;
+        el.style.left = `${left}px`;
     }
 
     function closeDragElement() {
         // stop moving when mouse button is released:
+        const centerPoint = controllerData.centerPoint;
+        const top = el.offsetTop - centerPoint.y;
+        const left = el.offsetLeft - centerPoint.x;
+        const scale = controllerData.scale;
+
+        setPosition({ x: Math.round(left * scale), y: Math.round(top * scale) });
+
         document.onmouseup = null;
         document.ontouchend = null;
         document.onmousemove = null;
@@ -274,7 +278,7 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                 }
             });
 
-            makePreview(file, 250).then((src) => {
+            makePreview(file, controllerData.width * 3).then((src) => {
                 if (canvasRef.current) {
                     const canvas = canvasRef.current!;
                     canvas.src = src;
