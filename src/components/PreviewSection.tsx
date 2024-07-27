@@ -3,7 +3,7 @@
 import { memo, useRef, useEffect, useCallback, useState } from "react";
 // local components
 import { Position } from "./SharedTypes.tsx";
-import { getCenterPos, twibbon } from "./SharedFunc.tsx";
+import { getCenterPos, getCenterPosFromAnchor, twibbon } from "./SharedFunc.tsx";
 import { usePopup } from "./Popup.tsx";
 import CaptionPopup from "./popups/CaptionPopup.tsx";
 // assets
@@ -71,6 +71,14 @@ const makeImageCanvas = async (data: ImageData, signal: AbortSignal) => {
     });
 };
 
+let box = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    scale: -1,
+};
+
 const PreviewSection = memo(function PreviewSection({
     image,
     width,
@@ -110,9 +118,12 @@ const PreviewSection = memo(function PreviewSection({
                 }
             }
         }
-    
+
         if (!hasUserPictureLayer && image) _images.push({ ...image, cover: true });
 
+        if (!image) {
+            box.scale = -1;
+        }
         setImages(_images);
     }, [image]);
 
@@ -137,21 +148,42 @@ const PreviewSection = memo(function PreviewSection({
 
                 loaded.reverse().forEach(({ img, pos, w, h, cover }) => {
                     if (cover) {
-                        const { imagePosition, imageSize } = getCenterPos(
-                            scale,
+                        if (box.scale < 0) {
+                            const { imagePosition, imageSize } = getCenterPos(
+                                scale,
+                                false,
+                                backCanvas?.width!,
+                                backCanvas?.height!,
+                                img.width,
+                                img.height
+                            );
+
+                            box = {
+                                x: imagePosition.x,
+                                y: imagePosition.y,
+                                width: imageSize.width!,
+                                height: imageSize.height!,
+                                scale: scale,
+                            };
+                        }
+
+                        const recalc = getCenterPosFromAnchor(
+                            scale / box.scale,
                             false,
                             backCanvas?.width!,
                             backCanvas?.height!,
-                            img.width,
-                            img.height
+                            box.width,
+                            box.height,
+                            box.y + pos.y,
+                            box.x + pos.x
                         );
 
                         backCtx?.drawImage(
                             img,
-                            imagePosition.x + pos.x,
-                            imagePosition.y + pos.y,
-                            imageSize.w!,
-                            imageSize.h!
+                            recalc.imagePosition.x,
+                            recalc.imagePosition.y,
+                            recalc.imageSize.width!,
+                            recalc.imageSize.height!
                         );
                     }
 
@@ -214,16 +246,18 @@ const PreviewSection = memo(function PreviewSection({
                     style={{ height: "100%" }}>
                     Download
                 </button>
-                {twibbon.caption && <button
-                    type="button"
-                    className={`button`}
-                    onClick={loadCaption}
-                    style={{
-                        height: "100%",
-                        color: "var(--accent-button-text-color)",
-                    }}>
-                    Caption
-                </button>}
+                {twibbon.caption && (
+                    <button
+                        type="button"
+                        className={`button`}
+                        onClick={loadCaption}
+                        style={{
+                            height: "100%",
+                            color: "var(--accent-button-text-color)",
+                        }}>
+                        Caption
+                    </button>
+                )}
             </div>
         </div>
     );

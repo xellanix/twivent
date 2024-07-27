@@ -5,18 +5,32 @@ import { IconX, IconReload, IconArrowsMove, IconUpload } from "@tabler/icons-rea
 import { AspectRatio } from "react-aspect-ratio";
 // local components
 import { Position } from "./SharedTypes.tsx";
-import { makePreview, getCenterPos, delay, controllerData } from "./SharedFunc.tsx";
+import {
+    makePreview,
+    getCenterPos,
+    delay,
+    controllerData,
+    getCenterPosFromAnchor,
+} from "./SharedFunc.tsx";
 import InfoBox, { InfoStatus } from "./InfoBox.tsx";
 // assets
 // local assets
 // styles
 import "react-aspect-ratio/aspect-ratio.css";
 
-const setControllerSizePos = (src: string, canvas: HTMLElement, scale: number) => {
+let box = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    scale: -1,
+};
+
+const setControllerSizePos = (canvas: HTMLImageElement, scale: number) => {
     return new Promise<void>((resolve) => {
         // create a temp image to get the size
         const temp = new Image();
-        temp.src = src;
+        temp.src = canvas.src;
         temp.onload = () => {
             const { imagePosition, imageSize } = getCenterPos(
                 scale,
@@ -27,8 +41,8 @@ const setControllerSizePos = (src: string, canvas: HTMLElement, scale: number) =
                 temp.height
             );
 
-            if (imageSize.w) canvas.style.width = `${imageSize.w!}%`;
-            if (imageSize.h) canvas.style.height = `${imageSize.h!}%`;
+            if (imageSize.width) canvas.style.width = `${imageSize.width!}%`;
+            if (imageSize.height) canvas.style.height = `${imageSize.height!}%`;
 
             controllerData.centerPoint = imagePosition;
 
@@ -59,6 +73,8 @@ const dragElement = (
         // get the mouse cursor position at startup:
         pos3 = (isMouse ? e.clientX : e.touches[0].clientX) - centerPos.x;
         pos4 = (isMouse ? e.clientY : e.touches[0].clientY) - centerPos.y;
+
+        el.classList.add("on-drag");
 
         document.onmouseup = closeDragElement;
         document.ontouchend = closeDragElement;
@@ -92,12 +108,9 @@ const dragElement = (
 
     function closeDragElement() {
         // stop moving when mouse button is released:
-        const centerPoint = controllerData.centerPoint;
-        const top = el.offsetTop - centerPoint.y;
-        const left = el.offsetLeft - centerPoint.x;
-        const scale = controllerData.scale;
+        setPosition({ x: el.offsetLeft, y: el.offsetTop });
 
-        setPosition({ x: Math.round(left * scale), y: Math.round(top * scale) });
+        el.classList.remove("on-drag");
 
         document.onmouseup = null;
         document.ontouchend = null;
@@ -264,10 +277,12 @@ export const ProcessFileZone = memo(function ProcessFileZone({
     const imageRef = useRef<HTMLImageElement>(null);
     const canvasRef = useRef<HTMLImageElement>(null);
 
-    const [anchorPoint, setAnchorPoint] = useState<Position>({ x: 0, y: 0 });
+    const [draggedPos, setDraggedPos] = useState<Position>({ x: 0, y: 0 });
+    const [controllerPos, setControllerPos] = useState<Position>({ x: 0, y: 0 });
 
     const resetImage = useCallback(() => {
         setFile(null);
+        box.scale = -1;
     }, [setFile]);
 
     useEffect(() => {
@@ -283,9 +298,19 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                     const canvas = canvasRef.current!;
                     canvas.src = src;
 
-                    setControllerSizePos(src, canvas, imageScale).then(() => {
-                        setAnchorPoint(controllerData.centerPoint);
-                        dragElement(canvas, setImagePos);
+                    setControllerSizePos(canvas, imageScale).then(() => {
+                        dragElement(canvas, setDraggedPos);
+
+                        if (box.scale < 0) {
+                            box = {
+                                ...controllerData.centerPoint,
+                                width: canvas.width,
+                                height: canvas.height,
+                                scale: imageScale,
+                            };
+                        }
+
+                        setImagePos({ ...imagePos });
                     });
                 }
             });
@@ -296,11 +321,53 @@ export const ProcessFileZone = memo(function ProcessFileZone({
         if (canvasRef.current) {
             const canvas = canvasRef.current!;
 
-            setControllerSizePos(canvas.src, canvas, imageScale).then(() => {
-                setAnchorPoint(controllerData.centerPoint);
+            setControllerSizePos(canvas, imageScale).then(() => {
+                const recalc = getCenterPosFromAnchor(
+                    imageScale / box.scale,
+                    true,
+                    controllerData.width,
+                    controllerData.height,
+                    box.width,
+                    box.height,
+                    imagePos.y / controllerData.scale + box.y,
+                    imagePos.x / controllerData.scale + box.x
+                );
+
+                setControllerPos(recalc.imagePosition);
+
+                controllerData.centerPoint = {
+                    x: -imagePos.x / controllerData.scale + recalc.imagePosition.x,
+                    y: -imagePos.y / controllerData.scale + recalc.imagePosition.y,
+                };
             });
         }
     }, [imageScale]);
+
+    useEffect(() => {
+        const recalc = getCenterPosFromAnchor(
+            imageScale / box.scale,
+            true,
+            controllerData.width,
+            controllerData.height,
+            box.width,
+            box.height,
+            imagePos.y / controllerData.scale + box.y,
+            imagePos.x / controllerData.scale + box.x
+        );
+
+        setControllerPos(recalc.imagePosition);
+    }, [imagePos]);
+
+    useEffect(() => {
+        const scale = imageScale / box.scale;
+        const imageLeft = (2 * draggedPos.x + controllerData.width * (scale - 1)) / (2 * scale);
+        const imageTop = (2 * draggedPos.y + controllerData.height * (scale - 1)) / (2 * scale);
+
+        const posx = -controllerData.scale * (box.x - imageLeft);
+        const posy = -controllerData.scale * (box.y - imageTop);
+
+        setImagePos({ x: Math.round(posx), y: Math.round(posy) });
+    }, [draggedPos]);
 
     return (
         <div className="vertical-layout vertical-gap2x">
@@ -369,9 +436,11 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                             objectFit: "cover",
                             objectPosition: "0 0",
                             cursor: "move",
-                            top: `${imagePos.y / controllerData.scale + anchorPoint.y}px`,
-                            left: `${imagePos.x / controllerData.scale + anchorPoint.x}px`,
+                            top: `${controllerPos.y}px`,
+                            left: `${controllerPos.x}px`,
                             pointerEvents: "initial",
+                            transition:
+                                "top 200ms ease-out, left 200ms ease-out, width 200ms ease-out, height 200ms ease-out",
                         }}
                     />
                     <div
@@ -388,7 +457,9 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                         onClick={(ev) => {
                             const el = ev.currentTarget;
                             el.classList.add("hide");
-                            delay(133).then(() => el.style.display = "none");
+                            delay(133).then(() => {
+                                el.style.display = "none";
+                            });
                         }}>
                         <IconArrowsMove
                             color="var(--text-color)"

@@ -1,4 +1,4 @@
-import { Position, ReplacementParams } from "./SharedTypes";
+import { Position, Rect, ReplacementParams, Size } from "./SharedTypes";
 
 type TwibbonHeader = {
     title: string;
@@ -10,19 +10,20 @@ type Caption = {
     params: ReplacementParams;
 };
 
-type TwibbonData = {
-    width: number;
-    height: number;
+type TwibbonData = Size & {
     sources: Map<string, string> | null;
     totalLayer: number;
     caption: Caption | null;
 };
 
-type ControllerData = {
-    width: number;
-    height: number;
+type ControllerData = Size & {
     scale: number;
     centerPoint: Position;
+};
+
+type OptionalSize = {
+    width?: number;
+    height?: number;
 };
 
 export const pageUrl = () => window.location.origin + window.location.pathname;
@@ -194,36 +195,95 @@ export function makePreview(src: File, min: number) {
     });
 }
 
-export const getCenterPos = (
+const resizeRectFromAnchor = (rect: Rect, scale: number, anchorPoint: Position): Rect => {
+    const gapWidth = (anchorPoint.x - rect.x) * scale;
+    const gapHeight = (anchorPoint.y - rect.y) * scale;
+
+    return {
+        x: Math.round(anchorPoint.x - gapWidth),
+        y: Math.round(anchorPoint.y - gapHeight),
+        width: Math.round(rect.width * scale),
+        height: Math.round(rect.height * scale),
+    };
+};
+
+export const getCenterPosFromAnchor = (
     scale: number,
-    useScale: boolean,
-    canvasWidth: number,
-    canvasHeight: number,
-    w: number,
-    h: number
+    returnAsScale: boolean,
+    boundingBoxWidth: number,
+    boundingBoxHeight: number,
+    imageWidth: number,
+    imageHeight: number,
+    imageTop: number,
+    imageLeft: number
 ) => {
-    const canvasAspect = canvasWidth / canvasHeight;
-    const imageAspect = w / h;
+    const anchorPoint = {
+        x: boundingBoxWidth / 2,
+        y: boundingBoxHeight / 2,
+    };
 
-    let drawWidth, drawHeight, offsetX, offsetY;
-    let imageSize: { w?: number; h?: number } = {};
+    const rect = {
+        x: imageLeft,
+        y: imageTop,
+        width: imageWidth,
+        height: imageHeight,
+    };
 
-    if (imageAspect > canvasAspect) {
-        drawHeight = (canvasHeight * scale) / 100;
-        drawWidth = (w * (canvasHeight / h) * scale) / 100;
+    let imageSize: OptionalSize = {};
 
-        if (useScale) imageSize = { h: scale };
-    } else {
-        drawWidth = (canvasWidth * scale) / 100;
-        drawHeight = (h * (canvasWidth / w) * scale) / 100;
+    const newRect = resizeRectFromAnchor(rect, scale, anchorPoint);
 
-        if (useScale) imageSize = { w: scale };
+    if (returnAsScale){
+        const boundingAspect = boundingBoxWidth / boundingBoxHeight;
+        const imageAspect = newRect.width / newRect.height;
+
+        if (imageAspect > boundingAspect) {
+            imageSize = { height: scale };
+        }
+        else {
+            imageSize = { width: scale };
+        }
+    }
+    else {
+        imageSize = newRect;
     }
 
-    offsetX = (canvasWidth - drawWidth) / 2;
-    offsetY = (canvasHeight - drawHeight) / 2;
+    return {
+        imagePosition: newRect,
+        imageSize,
+    };
+}
 
-    if (!useScale) imageSize = { w: drawWidth, h: drawHeight };
+export const getCenterPos = (
+    scale: number,
+    returnAsScale: boolean,
+    boundingBoxWidth: number,
+    boundingBoxHeight: number,
+    imageWidth: number,
+    imageHeight: number
+) => {
+    const boundingAspect = boundingBoxWidth / boundingBoxHeight;
+    const imageAspect = imageWidth / imageHeight;
+
+    let drawWidth, drawHeight, offsetX, offsetY;
+    let imageSize: OptionalSize = {};
+
+    if (imageAspect > boundingAspect) {
+        drawHeight = (boundingBoxHeight * scale) / 100;
+        drawWidth = (imageWidth * (boundingBoxHeight / imageHeight) * scale) / 100;
+
+        if (returnAsScale) imageSize = { height: scale };
+    } else {
+        drawWidth = (boundingBoxWidth * scale) / 100;
+        drawHeight = (imageHeight * (boundingBoxWidth / imageWidth) * scale) / 100;
+
+        if (returnAsScale) imageSize = { width: scale };
+    }
+
+    offsetX = (boundingBoxWidth - drawWidth) / 2;
+    offsetY = (boundingBoxHeight - drawHeight) / 2;
+
+    if (!returnAsScale) imageSize = { width: drawWidth, height: drawHeight };
 
     return {
         imagePosition: { x: offsetX, y: offsetY } as Position,

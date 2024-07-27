@@ -109,6 +109,9 @@
     pointer-events: none;
     z-index: 1;
 }
+#image-controller > img.on-drag {
+    transition: none !important;
+}
 
 #image-controller-helper.hide {
     opacity: 0 !important;
