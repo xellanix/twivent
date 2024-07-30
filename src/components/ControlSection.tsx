@@ -1,7 +1,7 @@
 // IMPORT SECTION
 // node_modules
 import React, { memo, useCallback, useEffect, useState, useRef } from "react";
-import { IconX, IconReload, IconArrowsMove, IconUpload } from "@tabler/icons-react";
+import { IconX, IconReload, IconArrowsMove, IconUpload, IconPhoto } from "@tabler/icons-react";
 import { AspectRatio } from "react-aspect-ratio";
 // local components
 import { Position } from "./SharedTypes.tsx";
@@ -11,6 +11,7 @@ import {
     delay,
     controllerData,
     getCenterPosFromAnchor,
+    isSamePosition,
 } from "./SharedFunc.tsx";
 import InfoBox, { InfoStatus } from "./InfoBox.tsx";
 // assets
@@ -50,6 +51,14 @@ const setControllerSizePos = (canvas: HTMLImageElement, scale: number) => {
         };
     });
 };
+
+const setElementPos = (el: HTMLElement, pos: Position) => {
+    el.style.top = `${pos.y}px`;
+    el.style.left = `${pos.x}px`;
+};
+
+// bound a number in the min and max range
+const boundNumber = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max);
 
 const dragElement = (
     el: HTMLElement,
@@ -108,7 +117,15 @@ const dragElement = (
 
     function closeDragElement() {
         // stop moving when mouse button is released:
-        setPosition({ x: el.offsetLeft, y: el.offsetTop });
+
+        let finalx = boundNumber(el.offsetLeft, controllerData.width - el.offsetWidth, 0);
+        let finaly = boundNumber(el.offsetTop, controllerData.height - el.offsetHeight, 0);
+
+        setPosition((prev) => {
+            const current = { x: finalx, y: finaly };
+
+            return isSamePosition(prev, current) ? prev : current;
+        });
 
         el.classList.remove("on-drag");
 
@@ -274,11 +291,9 @@ export const ProcessFileZone = memo(function ProcessFileZone({
     imagePos: Position;
     setImagePos: React.Dispatch<React.SetStateAction<Position>>;
 }) {
-    const imageRef = useRef<HTMLImageElement>(null);
-    const canvasRef = useRef<HTMLImageElement>(null);
+    const controllerRef = useRef<HTMLImageElement>(null);
 
     const [draggedPos, setDraggedPos] = useState<Position>({ x: 0, y: 0 });
-    const [controllerPos, setControllerPos] = useState<Position>({ x: 0, y: 0 });
 
     const resetImage = useCallback(() => {
         setFile(null);
@@ -287,25 +302,19 @@ export const ProcessFileZone = memo(function ProcessFileZone({
 
     useEffect(() => {
         if (file) {
-            makePreview(file, 64).then((src) => {
-                if (imageRef.current) {
-                    imageRef.current.src = src;
-                }
-            });
-
             makePreview(file, controllerData.width * 3).then((src) => {
-                if (canvasRef.current) {
-                    const canvas = canvasRef.current!;
-                    canvas.src = src;
+                if (controllerRef.current) {
+                    const elem = controllerRef.current!;
+                    elem.src = src;
 
-                    setControllerSizePos(canvas, imageScale).then(() => {
-                        dragElement(canvas, setDraggedPos);
+                    setControllerSizePos(elem, imageScale).then(() => {
+                        dragElement(elem, setDraggedPos);
 
                         if (box.scale < 0) {
                             box = {
                                 ...controllerData.centerPoint,
-                                width: canvas.width,
-                                height: canvas.height,
+                                width: elem.width,
+                                height: elem.height,
                                 scale: imageScale,
                             };
                         }
@@ -318,10 +327,10 @@ export const ProcessFileZone = memo(function ProcessFileZone({
     }, [file]);
 
     useEffect(() => {
-        if (canvasRef.current) {
-            const canvas = canvasRef.current!;
+        if (controllerRef.current) {
+            const elem = controllerRef.current!;
 
-            setControllerSizePos(canvas, imageScale).then(() => {
+            setControllerSizePos(elem, imageScale).then(() => {
                 const recalc = getCenterPosFromAnchor(
                     imageScale / box.scale,
                     true,
@@ -333,7 +342,7 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                     imagePos.x / controllerData.scale + box.x
                 );
 
-                setControllerPos(recalc.imagePosition);
+                setElementPos(elem, recalc.imagePosition);
 
                 controllerData.centerPoint = {
                     x: -imagePos.x / controllerData.scale + recalc.imagePosition.x,
@@ -344,6 +353,8 @@ export const ProcessFileZone = memo(function ProcessFileZone({
     }, [imageScale]);
 
     useEffect(() => {
+        if (!controllerRef.current) return;
+
         const recalc = getCenterPosFromAnchor(
             imageScale / box.scale,
             true,
@@ -355,7 +366,7 @@ export const ProcessFileZone = memo(function ProcessFileZone({
             imagePos.x / controllerData.scale + box.x
         );
 
-        setControllerPos(recalc.imagePosition);
+        setElementPos(controllerRef.current!, recalc.imagePosition);
     }, [imagePos]);
 
     useEffect(() => {
@@ -363,10 +374,14 @@ export const ProcessFileZone = memo(function ProcessFileZone({
         const imageLeft = (2 * draggedPos.x + controllerData.width * (scale - 1)) / (2 * scale);
         const imageTop = (2 * draggedPos.y + controllerData.height * (scale - 1)) / (2 * scale);
 
-        const posx = -controllerData.scale * (box.x - imageLeft);
-        const posy = -controllerData.scale * (box.y - imageTop);
+        const posx = Math.round(-controllerData.scale * (box.x - imageLeft));
+        const posy = Math.round(-controllerData.scale * (box.y - imageTop));
 
-        setImagePos({ x: Math.round(posx), y: Math.round(posy) });
+        setImagePos((prev) => {
+            const current = { x: posx, y: posy };
+
+            return isSamePosition(prev, current) ? prev : current;
+        });
     }, [draggedPos]);
 
     return (
@@ -377,20 +392,9 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                     padding: "var(--section-gap-vertical)",
                     borderRadius: "16px",
                 }}>
-                <div style={{ width: "min(max(10%, 36px), 96px)" }}>
+                <div style={{ width: "min(max(10%, 36px), 56px)" }}>
                     <AspectRatio ratio={1 / 1}>
-                        <img
-                            ref={imageRef}
-                            width={16}
-                            height={16}
-                            alt=""
-                            style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                                borderRadius: "8px",
-                            }}
-                        />
+                        <IconPhoto color="var(--text-color)" size="100%" stroke={1.75} />
                     </AspectRatio>
                 </div>
 
@@ -430,14 +434,12 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                         margin: "0 auto",
                     }}>
                     <img
-                        ref={canvasRef}
+                        ref={controllerRef}
                         style={{
                             position: "absolute",
                             objectFit: "cover",
                             objectPosition: "0 0",
                             cursor: "move",
-                            top: `${controllerPos.y}px`,
-                            left: `${controllerPos.x}px`,
                             pointerEvents: "initial",
                             transition:
                                 "top 200ms ease-out, left 200ms ease-out, width 200ms ease-out, height 200ms ease-out",

@@ -236,6 +236,7 @@ const PreviewSection = memo(function PreviewSection({
                 boxSizing: "border-box",
                 flex: "35 1 0",
             }}>
+            <h3>Preview</h3>
             <canvas ref={canvasRef} width={width} height={height} style={{ width: "100%" }} />
             <canvas ref={backCanvasRef} width={width} height={height} style={{ display: "none" }} />
             <div className="wrapper-only" style={{ flexDirection: "row" }}>
@@ -253,7 +254,6 @@ const PreviewSection = memo(function PreviewSection({
                         onClick={loadCaption}
                         style={{
                             height: "100%",
-                            color: "var(--accent-button-text-color)",
                         }}>
                         Caption
                     </button>

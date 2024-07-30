@@ -129,17 +129,17 @@ const CaptionPopup = memo(function CaptionPopup() {
                         }}>
                         {copyStatus === "accent" ? (
                             <>
-                                <IconCopy color="var(--text-color)" />
+                                <IconCopy color="var(--accent-button-text-color)" />
                                 Copy
                             </>
                         ) : copyStatus === "success" ? (
                             <>
-                                <IconCheck color="var(--text-color)" />
+                                <IconCheck color="var(--accent-button-text-color)" />
                                 Copied
                             </>
                         ) : (
                             <>
-                                <IconX color="var(--text-color)" />
+                                <IconX color="var(--accent-button-text-color)" />
                                 Failed
                             </>
                         )}

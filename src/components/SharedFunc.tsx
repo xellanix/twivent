@@ -291,4 +291,8 @@ export const getCenterPos = (
     };
 };
 
+export function isSamePosition(pos1: Position, pos2: Position): boolean {
+    return pos1.x === pos2.x && pos1.y === pos2.y;
+}
+
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

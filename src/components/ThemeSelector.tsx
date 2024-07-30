@@ -18,10 +18,6 @@ const ThemeSelector = memo(function ThemeSelector() {
     }, []);
 
     useEffect(() => {
-        themeChanged();
-    }, [useDarkMode]);
-
-    const themeChanged = useCallback(() => {
         if (useDarkMode) {
             document.body.classList.remove("light-theme");
             document.body.classList.add("dark-theme");
