@@ -3,6 +3,7 @@
 import React, { memo, useCallback, useEffect, useState, useRef } from "react";
 import { IconX, IconReload, IconArrowsMove, IconUpload, IconPhoto } from "@tabler/icons-react";
 import { AspectRatio } from "react-aspect-ratio";
+import { InfoBox, InfoStatus, Slider, SliderInput } from "xellanix-react";
 // local components
 import { Position } from "./SharedTypes.tsx";
 import {
@@ -13,7 +14,6 @@ import {
     getCenterPosFromAnchor,
     isSamePosition,
 } from "./SharedFunc.tsx";
-import InfoBox, { InfoStatus } from "./InfoBox.tsx";
 // assets
 // local assets
 // styles
@@ -292,6 +292,7 @@ export const ProcessFileZone = memo(function ProcessFileZone({
     setImagePos: React.Dispatch<React.SetStateAction<Position>>;
 }) {
     const controllerRef = useRef<HTMLImageElement>(null);
+    const scaleSliderInputRef = useRef<HTMLInputElement>(null);
 
     const [draggedPos, setDraggedPos] = useState<Position>({ x: 0, y: 0 });
 
@@ -481,16 +482,10 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                             <label htmlFor="image-scale" className="flex-fill">
                                 Scale
                             </label>
-                            <input
-                                type="number"
-                                name="image-scale-text"
+                            <SliderInput
+                                sliderInputRef={scaleSliderInputRef}
                                 id="image-scale-text"
-                                min={0}
-                                max={500}
-                                step={10}
-                                value={imageScale}
                                 style={{ width: "64px" }}
-                                onChange={(ev) => setImageScale(Number(ev.currentTarget.value))}
                             />
                             <div className="wrapper-only">
                                 <button
@@ -504,15 +499,15 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                                 </button>
                             </div>
                         </div>
-                        <input
-                            className="flex-fill"
-                            type="range"
-                            name="image-scale"
+                        <Slider
+                            sliderInputRef={scaleSliderInputRef}
                             id="image-scale"
+                            className="flex-fill"
                             min={0}
                             max={500}
-                            value={imageScale}
-                            onChange={(ev) => setImageScale(Number(ev.currentTarget.value))}
+                            initialValue={imageScale}
+                            step={1}
+                            onDeferredChange={setImageScale}
                         />
                     </div>
 

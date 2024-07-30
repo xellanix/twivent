@@ -1,3 +1,7 @@
+body {
+	--airplane-max-width: 40dvw;
+}
+
 #fixed-container > * {
     pointer-events: initial;
 }

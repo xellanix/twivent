@@ -1,10 +1,10 @@
 // IMPORT SECTION
 // node_modules
 import { memo, useRef, useEffect, useCallback, useState } from "react";
+import { usePopup } from "xellanix-react";
 // local components
 import { Position } from "./SharedTypes.tsx";
 import { getCenterPos, getCenterPosFromAnchor, twibbon } from "./SharedFunc.tsx";
-import { usePopup } from "./Popup.tsx";
 import CaptionPopup from "./popups/CaptionPopup.tsx";
 // assets
 // local assets

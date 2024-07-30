@@ -2,20 +2,13 @@
 // node_modules
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { PopupProvider } from "xellanix-react";
 // local components
 import App from "./App.tsx";
-import PopupProvider from "./Popup.tsx";
 // assets
 // local assets
 // styles
-import "../styles/main-frame.css";
-import "../styles/header-section.css";
-import "../styles/nav-styles.css";
-import "../styles/flex-align.css";
-import "../styles/text-align.css";
-import "../styles/popup.css";
-import "../styles/info-box.css";
-import "../styles/button.css";
+import "xellanix-react/style.css";
 import "../styles/styles.css";
 import "../styles/media-styles.css";
 
