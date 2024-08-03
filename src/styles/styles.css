@@ -91,3 +91,11 @@ body {
 .progress-label {
     font-size: var(--h5-font-size) !important;
 }
+
+.template-replacement {
+    font-weight: bold;
+    background-color: var(--accent-color);
+    color: var(--accent-button-text-color);
+    border-radius: 6px;
+    padding: 6px 8px;
+}

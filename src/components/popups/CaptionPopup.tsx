@@ -10,9 +10,36 @@ import { ReplacementParams } from "../SharedTypes";
 // local assets
 // styles
 
-const replaceTemplate = (template: string, replacements: { [key: string]: string }): string => {
-    return template.replace(/<<(\w+)>>/g, (_, key) => replacements[key] || `<<${key}>>`);
+const replaceTemplate = (template: string, replacements: { [key: string]: string }): React.ReactNode[] => {
+    const regex = /<<(\w+)>>/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = regex.exec(template)) !== null) {
+        const [placeholder, key] = match;
+        const startIndex = match.index;
+        const endIndex = regex.lastIndex;
+
+        // Add the text before the placeholder
+        parts.push(template.slice(lastIndex, startIndex));
+
+        // Add the replacement with a span element
+        parts.push(
+            <span key={key} className="template-replacement">
+                {replacements[key] || placeholder}
+            </span>
+        );
+
+        lastIndex = endIndex;
+    }
+
+    // Add the remaining text after the last placeholder
+    parts.push(template.slice(lastIndex));
+
+    return parts;
 };
+
 
 const TemplateText = memo(function TemplateText({
     preRef,
@@ -23,7 +50,7 @@ const TemplateText = memo(function TemplateText({
     template: string;
     replacements: ReplacementParams;
 }) {
-    const [formattedText, setFormattedText] = useState<string>("");
+    const [formattedText, setFormattedText] = useState<React.ReactNode[]>([]);
 
     useEffect(() => {
         const v3: { [key: string]: string } = Object.keys(replacements).reduce(
@@ -124,7 +151,6 @@ const CaptionPopup = memo(function CaptionPopup() {
                         className={`button ${copyStatus}`}
                         onClick={copyCaption}
                         style={{
-                            height: "100%",
                             color: "var(--accent-button-text-color)",
                         }}>
                         {copyStatus === "accent" ? (
