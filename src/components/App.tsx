@@ -1,6 +1,6 @@
 // IMPORT SECTION
 // node_modules
-import { useEffect, useState, memo, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 // local components
 import ThemeSelector from "./ThemeSelector.tsx";
@@ -19,24 +19,6 @@ import AnalizeImage from "./AnalizeImage.tsx";
 // assets
 // local assets
 // styles
-
-const FixedLayer = memo(function FixedLayer() {
-    return (
-        <div
-            className="horizontal-layout flex-align-right"
-            id="fixed-container"
-            style={{
-                zIndex: "999",
-                position: "fixed",
-                height: "100%",
-                width: "var(--content-max-width)",
-                top: "32px",
-                pointerEvents: "none",
-            }}>
-            <ThemeSelector />
-        </div>
-    );
-});
 
 function App() {
     const [folder, setFolder] = useState<string | null>(null);
@@ -99,7 +81,7 @@ function App() {
             {loaded ? (
                 <div
                     className="vertical-layout flex-fill"
-                    style={{ rowGap: "calc(var(--section-gap-horizontal) * 1.5)" }}>
+                    style={{ rowGap: "calc(var(--section-gap-horizontal) * 1.5)", padding: "48px 0" }}>
                     <div
                         className="vertical-layout flex-align-center flex-align-bottom flex-fill"
                         style={{ gap: "calc(var(--section-gap-vertical) * .5)" }}>
@@ -146,6 +128,7 @@ function App() {
                             Twivent (v{import.meta.env.VITE_APP_VER}
                             {folder && "f"}), made with love by DA02-XSTIA23
                         </span>
+                        <ThemeSelector />
                     </div>
                 </div>
             ) : (
@@ -161,8 +144,6 @@ function App() {
                     )}
                 </div>
             )}
-
-            <FixedLayer />
         </>
     );
 }

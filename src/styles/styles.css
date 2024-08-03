@@ -1,78 +1,9 @@
+html {
+    font-size: 20px !important;
+}
+
 body {
 	--airplane-max-width: 40dvw;
-}
-
-#fixed-container > * {
-    pointer-events: initial;
-}
-
-#theme-selector {
-    --selector-label-gap: 8px;
-    --selector-label-icon: 24px;
-    --selector-label-text: 50px;
-
-    --selector-padding-v: calc(var(--button-padding-vertical) * .75);
-    --selector-padding-h: calc(var(--button-padding-horizontal) * .75);
-    --selector-border-radius: calc(var(--button-border-radius) * .75);
-
-    --selector-option-icon-only-w: calc(var(--selector-padding-h) * 2 + var(--selector-label-icon));
-    /* --selector-option-icon-only-w + margin-left + text */
-    --selector-option-w: calc(var(--selector-option-icon-only-w) + var(--selector-label-gap) + var(--selector-label-text));
-    --selector-option-w-hover: calc(var(--selector-option-w) + var(--selector-option-icon-only-w));
-
-    display: flex;
-    flex-direction: row;
-    width: calc(var(--selector-option-icon-only-w) * 2);
-    height: fit-content;
-    background-color: var(--ternary-background-color2);
-    box-shadow: 0px 0px 42px 0px rgba(0, 0, 0, .15);
-    border-radius: var(--selector-border-radius);
-    transition: width 200ms ease-out;
-}
-
-#theme-selector:hover {
-    width: var(--selector-option-w-hover);
-}
-
-.theme-option-radio {
-    display: none;
-}
-
-.theme-option {
-    display: flex;
-    flex-direction: row;
-    padding: var(--selector-padding-v) var(--selector-padding-h);
-    cursor: pointer;
-    border-radius: var(--selector-border-radius);
-    width: var(--selector-label-icon);
-    transition: background-color 0ms ease-out, width 200ms ease-out;
-}
-
-.theme-option:hover {
-    width: calc(var(--selector-label-icon) + var(--selector-label-gap) + var(--selector-label-text));
-}
-
-.theme-option img {
-    max-width: var(--selector-label-icon);
-}
-
-.theme-option span {
-    display: flex;
-    overflow: hidden;
-    word-wrap: nowrap;
-    align-self: stretch;
-    opacity: 0;
-    transition: opacity 400ms ease-out;
-    margin-top: 3px;
-    margin-left: var(--selector-label-gap);
-}
-
-.theme-option:hover span {
-    opacity: 1;
-}
-
-.theme-option-radio:checked + .theme-option {
-    background-color: var(--secondary-background-color);
 }
 
 .dash-border {
@@ -155,4 +86,8 @@ body {
 .text-separator::after {
 	left: var(--separator-margin);
 	margin-right: -50%;
+}
+
+.progress-label {
+    font-size: var(--h5-font-size) !important;
 }

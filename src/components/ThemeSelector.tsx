@@ -1,12 +1,13 @@
 // IMPORT SECTION
 // node_modules
-import React, { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 // local components
 // assets
 import lightIcon from "../assets/sun-filled.svg";
 import darkIcon from "../assets/moon-filled.svg";
 // local assets
 // styles
+import "../styles/ThemeSelector.css";
 
 const ThemeSelector = memo(function ThemeSelector() {
     const [useDarkMode, setUseDarkMode] = useState(false);
@@ -27,40 +28,22 @@ const ThemeSelector = memo(function ThemeSelector() {
         }
     }, [useDarkMode]);
 
-    const selectorChanged = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        setUseDarkMode(e.target.value === "darktheme");
+    const selectorChanged = useCallback(() => {
+        setUseDarkMode(!document.body.classList.contains("dark-theme"));
     }, [setUseDarkMode]);
 
     return (
-        <div id="theme-selector" onChange={selectorChanged}>
-            <input
-                type="radio"
-                name="theme-selector"
-                value="lighttheme"
-                id="light-option"
-                className="theme-option-radio"
-                checked={!useDarkMode}
-                tabIndex={-1}
-            />
-            <label htmlFor="light-option" className="theme-option">
-                <img src={lightIcon} />
-                <span>Light</span>
-            </label>
-            <input
-                type="radio"
-                name="theme-selector"
-                value="darktheme"
-                id="dark-option"
-                className="theme-option-radio"
-                checked={useDarkMode}
-                tabIndex={-1}
-            />
-            <label htmlFor="dark-option" className="theme-option">
-                <img src={darkIcon} />
-                <span>Dark</span>
-            </label>
+        <div className="wrapper-only">
+            <button
+                type="button"
+                id="theme-button"
+                className="button no-border"
+                onClick={selectorChanged}>
+                <img src={useDarkMode ? darkIcon : lightIcon} />
+                <span>{useDarkMode ? "Dark" : "Light"}</span>
+            </button>
         </div>
     );
-})
+});
 
 export default ThemeSelector;

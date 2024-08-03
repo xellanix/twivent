@@ -200,7 +200,7 @@ export default function AnalizeImage({
                 loop
                 style={{ width: "var(--airplane-max-width)" }}
             />
-            <label style={{ fontSize: "var(--h4-font-size)" }}>Analyzing...</label>
+            <label className="progress-label">Analyzing...</label>
         </div>
     );
 }

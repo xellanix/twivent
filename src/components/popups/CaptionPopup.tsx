@@ -116,7 +116,7 @@ const CaptionPopup = memo(function CaptionPopup() {
                     maxHeight: "70dvh",
                     boxSizing: "border-box",
                 }}>
-                <h2>Preview</h2>
+                <h4>Preview</h4>
                 <TemplateText preRef={preRef} template={templateText} replacements={params ?? {}} />
                 <div className="wrapper-only" style={{ flexDirection: "row" }}>
                     <button
@@ -147,7 +147,7 @@ const CaptionPopup = memo(function CaptionPopup() {
                 </div>
             </div>
             <div className="vertical-layout flex-fill" style={{ minWidth: "250px" }}>
-                <h2 className="flex-self-center">Parameters</h2>
+                <h4 className="flex-self-center">Parameters</h4>
                 <div className="vertical-layout">
                     {params &&
                         Object.keys(params).map((key) => (

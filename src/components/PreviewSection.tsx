@@ -236,7 +236,7 @@ const PreviewSection = memo(function PreviewSection({
                 boxSizing: "border-box",
                 flex: "35 1 0",
             }}>
-            <h3>Preview</h3>
+            <h4>Preview</h4>
             <canvas ref={canvasRef} width={width} height={height} style={{ width: "100%" }} />
             <canvas ref={backCanvasRef} width={width} height={height} style={{ display: "none" }} />
             <div className="wrapper-only" style={{ flexDirection: "row" }}>

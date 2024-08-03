@@ -1,7 +1,7 @@
 {
   "name": "twivent",
   "private": true,
-  "version": "2.5.0",
+  "version": "2.6.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,7 +18,7 @@
     "react": "^18.3.1",
     "react-aspect-ratio": "^1.1.8",
     "react-dom": "^18.3.1",
-    "xellanix-react": "^1.1.2"
+    "xellanix-react": "^2.0.4"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

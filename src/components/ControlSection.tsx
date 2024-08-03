@@ -121,6 +121,9 @@ const dragElement = (
         let finalx = boundNumber(el.offsetLeft, controllerData.width - el.offsetWidth, 0);
         let finaly = boundNumber(el.offsetTop, controllerData.height - el.offsetHeight, 0);
 
+        el.style.top = `${finaly}px`;
+        el.style.left = `${finalx}px`;
+
         setPosition((prev) => {
             const current = { x: finalx, y: finaly };
 
@@ -241,14 +244,14 @@ export const InputFileZone = memo(function InputFileZone({
                     ev.preventDefault();
                     ev.currentTarget.classList.remove("dragover");
                 }}>
-                <IconUpload
-                    color="var(--text-color)"
+                <div
                     style={{
-                        width: "calc(var(--button-font-size) * 3) !important",
-                        height: "calc(var(--button-font-size) * 3) !important",
+                        width: "3em",
+                        height: "3em",
                         marginBottom: "var(--section-gap-vertical) !important",
-                    }}
-                />
+                    }}>
+                    <IconUpload color="var(--text-color)" size="100%" />
+                </div>
                 <h4 className="text-align-center">Drag and Drop File Here</h4>
                 <div className="text-separator">or</div>
                 <div className="wrapper-only">
@@ -393,13 +396,13 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                     padding: "var(--section-gap-vertical)",
                     borderRadius: "16px",
                 }}>
-                <div style={{ width: "min(max(10%, 36px), 56px)" }}>
+                <div style={{ width: "min(max(10%, 36px), 48px)" }}>
                     <AspectRatio ratio={1 / 1}>
                         <IconPhoto color="var(--text-color)" size="100%" stroke={1.75} />
                     </AspectRatio>
                 </div>
 
-                <h4
+                <h6
                     style={{
                         fontWeight: "600",
                         overflow: "hidden",
@@ -410,7 +413,7 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                         flex: "1 1 0",
                     }}>
                     {file?.name || "Unknown"}
-                </h4>
+                </h6>
                 <div className="wrapper-only">
                     <button type="button" className="button icon no-border" onClick={resetImage}>
                         <IconX color="var(--text-color)" />
@@ -464,16 +467,12 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                                 el.style.display = "none";
                             });
                         }}>
-                        <IconArrowsMove
-                            color="var(--text-color)"
-                            style={{
-                                width: "calc(var(--button-font-size) * 3) !important",
-                                height: "calc(var(--button-font-size) * 3) !important",
-                            }}
-                        />
-                        <h4 style={{ color: "var(--text-color)", fontWeight: "600" }}>
+                        <div style={{ width: "3em", height: "3em" }}>
+                            <IconArrowsMove color="var(--text-color)" size="100%" />
+                        </div>
+                        <h5 style={{ color: "var(--text-color)", fontWeight: "600" }}>
                             Drag to Move
-                        </h4>
+                        </h5>
                     </div>
                 </div>
                 <div className="vertical-layout vertical-gap2x flex-fill">
@@ -505,7 +504,7 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                             className="flex-fill"
                             min={0}
                             max={500}
-                            initialValue={imageScale}
+                            defaultValue={imageScale}
                             step={1}
                             onDeferredChange={setImageScale}
                         />

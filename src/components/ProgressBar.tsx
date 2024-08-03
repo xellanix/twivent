@@ -47,7 +47,7 @@ export default function ProgressBar({
                 />
             </div>
             {typeof message !== "undefined" && (
-                <label htmlFor={`progress-bar-${id}`} style={{ fontSize: "var(--h4-font-size)" }}>
+                <label htmlFor={`progress-bar-${id}`} className="progress-label">
                     {progress.current === progress.max && progress.max !== 0 ? "Done!" : message}
                 </label>
             )}

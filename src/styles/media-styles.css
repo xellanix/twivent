@@ -20,17 +20,7 @@
     }
 }
 
-@media (max-width: 700px) {
-    #theme-selector {
-        --selector-label-gap: 8px;
-        --selector-label-icon: 16px;
-        --selector-label-text: 40px;
-    }
-
-    #fixed-container {
-        width: calc(100% - 48px * 2) !important;
-    }
-    
+@media (max-width: 700px) {   
     #drag-drop-zone {
         padding: 32px;
     }

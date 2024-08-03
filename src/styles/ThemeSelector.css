@@ -1,0 +1,13 @@
+#theme-button {
+    line-height: 0 !important;
+    border: 0px !important;
+}
+
+#theme-button:hover {
+    background-color: var(--ternary-background-color) !important;
+}
+
+#theme-button > img {
+    width: 1.25em !important;
+    height: 1.25em !important;
+}
