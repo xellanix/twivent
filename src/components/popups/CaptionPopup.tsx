@@ -99,7 +99,7 @@ const CaptionPopup = memo(function CaptionPopup() {
     const paramChanged = useCallback(
         (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
             const elem = e.currentTarget;
-            const val = elem.value || elem.placeholder || "";
+            const val = elem.value;
 
             if (params) {
                 setParams({
