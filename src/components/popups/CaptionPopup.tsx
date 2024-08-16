@@ -2,7 +2,7 @@
 // node_modules
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 // local components
-import InputField from "../InputField";
+import InputField, { LongTextField } from "../InputField";
 import { IconCheck, IconCopy, IconX } from "@tabler/icons-react";
 import { delay, twibbon } from "../SharedFunc";
 import { ReplacementParams } from "../SharedTypes";
@@ -79,6 +79,50 @@ const renderBtnContent = (status: ButtonStatus) => {
                     <IconX color="currentColor" />
                     Failed
                 </>
+            );
+    }
+};
+
+const controlField = (
+    key: string,
+    param: ReplacementParams[keyof ReplacementParams],
+    paramChanged: (key: string) => (e: any) => void
+) => {
+    switch (param.type) {
+        case 1:
+            return (
+                <LongTextField
+                    key={key}
+                    name={key}
+                    label={param.label}
+                    placeholder={param.default}
+                    value={param.value}
+                    onChange={paramChanged(key)}
+                />
+            );
+        case 2:
+            return (
+                <DropdownField
+                    key={key}
+                    name={key}
+                    label={param.label}
+                    options={param.options!}
+                    placeholder={param.default}
+                    defaultValue={-1}
+                    onChange={paramChanged(key)}
+                />
+            );
+        default:
+            return (
+                <InputField
+                    key={key}
+                    name={key}
+                    label={param.label}
+                    placeholder={param.default}
+                    value={param.value}
+                    type="text"
+                    onChange={paramChanged(key)}
+                />
             );
     }
 };
@@ -192,27 +236,7 @@ const CaptionPopup = memo(function CaptionPopup() {
                 <div className="vertical-layout">
                     {params &&
                         Object.keys(params).map((key) =>
-                            params[key].type === 1 ? (
-                                <DropdownField
-                                    key={key}
-                                    name={key}
-                                    label={params[key].label}
-                                    options={params[key].options!}
-                                    placeholder={params[key].default}
-                                    defaultValue={-1}
-                                    onChange={paramChanged(key)}
-                                />
-                            ) : (
-                                <InputField
-                                    key={key}
-                                    name={key}
-                                    label={params[key].label}
-                                    placeholder={params[key].default}
-                                    value={params[key].value}
-                                    type="text"
-                                    onChange={paramChanged(key)}
-                                />
-                            )
+                            controlField(key, params[key], paramChanged)
                         )}
                 </div>
             </div>

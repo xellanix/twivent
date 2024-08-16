@@ -1,5 +1,18 @@
-.xellanix-input-field > input {
+.xellanix-input-field {
+	gap: 8px !important;
+}
+
+.xellanix-input-field > input, .xellanix-input-field > textarea {
 	padding: 16px !important;
 	border: 2px solid var(--separator-color2) !important;
 	border-radius: var(--button-border-radius) !important;
+}
+
+.xellanix-input-field > textarea {
+	height: 5em;
+}
+.xellanix-input-field > textarea:focus-visible {
+	outline: 3px solid var(--text-color)!important;
+	outline-offset: 2px!important;
+	border-radius: 6px;
 }
