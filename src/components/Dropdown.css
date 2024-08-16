@@ -1,0 +1,65 @@
+
+.xellanix-dropdown {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    gap: 0px;
+    border-radius: var(--button-border-radius);
+    border: 2px solid var(--separator-color2);
+    background-color: var(--primary-background-color) !important;
+}
+
+.xellanix-dropdown .dropdown-button {
+    display: flex;
+    padding: 16px;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.xellanix-dropdown .dropdown-button div {
+    height: 1em;
+    aspect-ratio: 1 / 1;
+    transform: rotate(0deg);
+    transition: transform 133ms ease-out;
+}
+
+.xellanix-dropdown.active .dropdown-button div {
+    transform: rotate(-180deg);
+}
+
+.xellanix-dropdown .options {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 1em;
+    padding: .5em;
+    border-radius: var(--button-border-radius);
+    border: 2px solid var(--separator-color2);
+    background-color: var(--primary-background-color) !important;
+    margin-bottom: 48px;
+}
+
+.xellanix-dropdown:not(.active) .options {
+    display: none;
+    margin-bottom: 0;
+}
+
+.xellanix-dropdown .options .option {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    padding: .5em;
+    white-space: nowrap;
+    border-radius: calc(.5 * var(--button-border-radius));
+    transition: background-color 87ms ease-out;
+}
+
+.xellanix-dropdown .options .option:hover {
+    background-color: var(--ternary-background-color);
+}

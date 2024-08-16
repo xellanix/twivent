@@ -15,5 +15,7 @@ export type ReplacementParams = {
         label: string;
         default: string;
         value: string;
+        type: number;
+        options?: string[];
     };
 };

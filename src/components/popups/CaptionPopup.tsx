@@ -1,16 +1,33 @@
 // IMPORT SECTION
 // node_modules
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 // local components
 import InputField from "../InputField";
 import { IconCheck, IconCopy, IconX } from "@tabler/icons-react";
 import { delay, twibbon } from "../SharedFunc";
 import { ReplacementParams } from "../SharedTypes";
+import { DropdownField } from "../Dropdown";
 // assets
 // local assets
 // styles
 
-const replaceTemplate = (template: string, replacements: { [key: string]: string }): React.ReactNode[] => {
+type ButtonStatus = "accent" | "success" | "error";
+
+const transformToKeyValue = (replacements: ReplacementParams): { [key: string]: string } => {
+    const result: { [key: string]: string } = {};
+
+    for (const key in replacements) {
+        if (replacements.hasOwnProperty(key)) {
+            result[key] = replacements[key].value || replacements[key].default;
+        }
+    }
+
+    return result;
+};
+
+const replaceTemplate = (template: string, raw: ReplacementParams): React.ReactNode[] => {
+    const replacements = transformToKeyValue(raw);
+
     const regex = /<<(\w+)>>/g;
     const parts = [];
     let lastIndex = 0;
@@ -40,6 +57,31 @@ const replaceTemplate = (template: string, replacements: { [key: string]: string
     return parts;
 };
 
+const renderBtnContent = (status: ButtonStatus) => {
+    switch (status) {
+        case "accent":
+            return (
+                <>
+                    <IconCopy color="currentColor" />
+                    Copy
+                </>
+            );
+        case "success":
+            return (
+                <>
+                    <IconCheck color="currentColor" />
+                    Copied
+                </>
+            );
+        case "error":
+            return (
+                <>
+                    <IconX color="currentColor" />
+                    Failed
+                </>
+            );
+    }
+};
 
 const TemplateText = memo(function TemplateText({
     preRef,
@@ -50,16 +92,9 @@ const TemplateText = memo(function TemplateText({
     template: string;
     replacements: ReplacementParams;
 }) {
-    const [formattedText, setFormattedText] = useState<React.ReactNode[]>([]);
+    const [result, setResult] = useState<React.ReactNode[]>([]);
 
-    useEffect(() => {
-        const v3: { [key: string]: string } = Object.keys(replacements).reduce(
-            (acc, key) => ({ ...acc, [key]: replacements[key].value || replacements[key].default }),
-            {}
-        );
-
-        setFormattedText(replaceTemplate(template, v3));
-    }, [template, replacements]);
+    useEffect(() => setResult(replaceTemplate(template, replacements)), [template, replacements]);
 
     return (
         <pre
@@ -76,16 +111,16 @@ const TemplateText = memo(function TemplateText({
                 width: "100%",
                 boxSizing: "border-box",
             }}>
-            {formattedText}
+            {result}
         </pre>
     );
 });
 
 const CaptionPopup = memo(function CaptionPopup() {
     const [templateText, setTemplateText] = useState<string>("");
-    const [params, setParams] = useState<ReplacementParams | null>(null);
+    const [params, setParams] = useState<ReplacementParams>({});
 
-    const [copyStatus, setCopyStatus] = useState<"accent" | "success" | "error">("accent");
+    const [copyStatus, setCopyStatus] = useState<ButtonStatus>("accent");
     const preRef = useRef<HTMLPreElement>(null);
 
     useEffect(() => {
@@ -97,21 +132,19 @@ const CaptionPopup = memo(function CaptionPopup() {
     }, []);
 
     const paramChanged = useCallback(
-        (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        (key: string) => (e: any) => {
             const elem = e.currentTarget;
             const val = elem.value;
 
-            if (params) {
-                setParams({
-                    ...params,
-                    [key]: {
-                        ...params[key],
-                        value: val,
-                    },
-                });
-            }
+            setParams((prev) => ({
+                ...prev,
+                [key]: {
+                    ...prev[key],
+                    value: val,
+                },
+            }));
         },
-        [params, setParams]
+        []
     );
 
     const copyCaption = useCallback(async () => {
@@ -148,27 +181,9 @@ const CaptionPopup = memo(function CaptionPopup() {
                 <div className="wrapper-only" style={{ flexDirection: "row" }}>
                     <button
                         type="button"
-                        className={`button ${copyStatus}`}
-                        onClick={copyCaption}
-                        style={{
-                            color: "var(--accent-button-text-color)",
-                        }}>
-                        {copyStatus === "accent" ? (
-                            <>
-                                <IconCopy color="var(--accent-button-text-color)" />
-                                Copy
-                            </>
-                        ) : copyStatus === "success" ? (
-                            <>
-                                <IconCheck color="var(--accent-button-text-color)" />
-                                Copied
-                            </>
-                        ) : (
-                            <>
-                                <IconX color="var(--accent-button-text-color)" />
-                                Failed
-                            </>
-                        )}
+                        className={`button template-copy-button ${copyStatus}`}
+                        onClick={copyCaption}>
+                        {renderBtnContent(copyStatus)}
                     </button>
                 </div>
             </div>
@@ -176,17 +191,29 @@ const CaptionPopup = memo(function CaptionPopup() {
                 <h4 className="flex-self-center">Parameters</h4>
                 <div className="vertical-layout">
                     {params &&
-                        Object.keys(params).map((key) => (
-                            <InputField
-                                key={key}
-                                name={key}
-                                label={params[key].label}
-                                placeholder={params[key].default}
-                                value={params[key].value}
-                                type="text"
-                                onChange={paramChanged(key)}
-                            />
-                        ))}
+                        Object.keys(params).map((key) =>
+                            params[key].type === 1 ? (
+                                <DropdownField
+                                    key={key}
+                                    name={key}
+                                    label={params[key].label}
+                                    options={params[key].options!}
+                                    placeholder={params[key].default}
+                                    defaultValue={-1}
+                                    onChange={paramChanged(key)}
+                                />
+                            ) : (
+                                <InputField
+                                    key={key}
+                                    name={key}
+                                    label={params[key].label}
+                                    placeholder={params[key].default}
+                                    value={params[key].value}
+                                    type="text"
+                                    onChange={paramChanged(key)}
+                                />
+                            )
+                        )}
                 </div>
             </div>
         </div>

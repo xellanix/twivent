@@ -1,0 +1,5 @@
+.xellanix-input-field > input {
+	padding: 16px !important;
+	border: 2px solid var(--separator-color2) !important;
+	border-radius: var(--button-border-radius) !important;
+}

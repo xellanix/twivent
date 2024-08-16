@@ -67,7 +67,9 @@ const dragElement = (
     let pos1 = 0,
         pos2 = 0,
         pos3 = 0,
-        pos4 = 0;
+        pos4 = 0,
+        lastTop = 0,
+        lastLeft = 0;
 
     el.onmousedown = dragMouseDown;
     el.ontouchstart = dragMouseDown;
@@ -78,6 +80,9 @@ const dragElement = (
         const isMouse = e instanceof MouseEvent;
 
         const centerPos = controllerData.centerPoint;
+
+        lastTop = el.offsetTop;
+        lastLeft = el.offsetLeft;
 
         // get the mouse cursor position at startup:
         pos3 = (isMouse ? e.clientX : e.touches[0].clientX) - centerPos.x;
@@ -127,7 +132,8 @@ const dragElement = (
         setPosition((prev) => {
             const current = { x: finalx, y: finaly };
 
-            return isSamePosition(prev, current) ? prev : current;
+            if (lastTop === finaly && lastLeft === finalx) return prev;
+            else return current;
         });
 
         el.classList.remove("on-drag");
@@ -502,7 +508,7 @@ export const ProcessFileZone = memo(function ProcessFileZone({
                             sliderInputRef={scaleSliderInputRef}
                             id="image-scale"
                             className="flex-fill"
-                            min={0}
+                            min={100}
                             max={500}
                             defaultValue={imageScale}
                             step={1}

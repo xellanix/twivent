@@ -16,6 +16,7 @@ body {
     box-shadow: 0;
     background-color: var(--primary-background-color);
 
+    will-change: box-shadow;
     transition: box-shadow 200ms ease-out;
 }
 #drag-drop-zone > * {
@@ -98,4 +99,12 @@ body {
     color: var(--accent-button-text-color);
     border-radius: 6px;
     padding: 6px 8px;
+}
+
+.template-copy-button {
+    color: var(--accent-button-text-color);
+}
+
+.popup {
+    will-change: transform, height;
 }

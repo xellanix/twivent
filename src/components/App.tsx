@@ -1,7 +1,8 @@
 // IMPORT SECTION
 // node_modules
 import { useEffect, useState, useCallback } from "react";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { DotLottieReact, setWasmUrl } from "@lottiefiles/dotlottie-react";
+import wasmUrl from "../wasm/dotlottie-player.wasm?url";
 // local components
 import ThemeSelector from "./ThemeSelector.tsx";
 import ControlSection, { InputFileZone, ProcessFileZone } from "./ControlSection.tsx";
@@ -19,6 +20,8 @@ import AnalizeImage from "./AnalizeImage.tsx";
 // assets
 // local assets
 // styles
+
+setWasmUrl(wasmUrl);
 
 function App() {
     const [folder, setFolder] = useState<string | null>(null);
