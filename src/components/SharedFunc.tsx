@@ -110,11 +110,11 @@ export const getAllLatestTwibbonLayers = async () => {
 export const getAllLayersWithRaw = async (
     folder: string,
     progressHandler?: (current?: number, max?: number) => void,
-    messageHandler?: any
+    messageHandler?: (message: string) => void
 ): Promise<TwibbonHeader> => {
     // https://raw.githubusercontent.com/xellanix/twiproj/main/orkess3/layer1.png
 
-    messageHandler("Fetching metadata...");
+    messageHandler?.("Fetching metadata...");
     const metadata = await (
         await fetch(
             `https://raw.githubusercontent.com/xellanix/twiproj/main/${folder}/metadata.json`
@@ -135,7 +135,7 @@ export const getAllLayersWithRaw = async (
     const getStatus = async (i: number) => {
         const url = `https://raw.githubusercontent.com/xellanix/twiproj/main/${folder}/layer${i}`;
         try {
-            messageHandler(`Fetching layer ${i}...`);
+            messageHandler?.(`Fetching layer ${i}...`);
 
             const png = await fetch(`${url}.png`);
             progressHandler && progressHandler(3 - (!png.ok ? 2 : 0));
