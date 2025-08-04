@@ -14,6 +14,9 @@ type TwibbonData = Size & {
     sources: Map<string, string> | null;
     totalLayer: number;
     caption: Caption | null;
+    userPhotoConfig: {
+        rect: Rect;
+    };
 };
 
 type ControllerData = Size & {
@@ -41,6 +44,9 @@ export let twibbon: TwibbonData = {
     sources: null,
     totalLayer: 0,
     caption: null,
+    userPhotoConfig: {
+        rect: { x: 0, y: 0, width: 1080, height: 1080 },
+    },
 };
 
 export const getLatestTwibbonFolder = async () => {
@@ -91,7 +97,18 @@ export const getAllLayers = async (folder: string): Promise<TwibbonHeader> => {
     twibbon.width = metadata.width;
     twibbon.height = metadata.height;
     twibbon.caption = metadata.caption ?? null;
-    controllerData.height = (controllerData.width * twibbon.height) / twibbon.width;
+
+    const _mRectConfig = metadata?.userPhotoConfig?.rect || undefined;
+    twibbon.userPhotoConfig.rect = {
+        x: _mRectConfig?.x || 0,
+        y: _mRectConfig?.y || 0,
+        width: _mRectConfig?.width || twibbon.width,
+        height: _mRectConfig?.height || twibbon.height,
+    };
+
+    controllerData.height =
+        (controllerData.width * twibbon.userPhotoConfig.rect.height) /
+        twibbon.userPhotoConfig.rect.width;
     controllerData.scale = twibbon.width / controllerData.width;
 
     twibbon.sources = new Map(reduced);
@@ -125,7 +142,17 @@ export const getAllLayersWithRaw = async (
     twibbon.height = metadata.height;
     twibbon.caption = metadata.caption ?? null;
 
-    controllerData.height = (controllerData.width * twibbon.height) / twibbon.width;
+    const _mRectConfig = metadata?.userPhotoConfig?.rect || undefined;
+    twibbon.userPhotoConfig.rect = {
+        x: _mRectConfig?.x || 0,
+        y: _mRectConfig?.y || 0,
+        width: _mRectConfig?.width || twibbon.width,
+        height: _mRectConfig?.height || twibbon.height,
+    };
+
+    controllerData.height =
+        (controllerData.width * twibbon.userPhotoConfig.rect.height) /
+        twibbon.userPhotoConfig.rect.width;
     controllerData.scale = twibbon.width / controllerData.width;
 
     const totalLayer = metadata.lastLayerIndex;
@@ -233,18 +260,16 @@ export const getCenterPosFromAnchor = (
 
     const newRect = resizeRectFromAnchor(rect, scale, anchorPoint);
 
-    if (returnAsScale){
+    if (returnAsScale) {
         const boundingAspect = boundingBoxWidth / boundingBoxHeight;
         const imageAspect = newRect.width / newRect.height;
 
         if (imageAspect > boundingAspect) {
             imageSize = { height: scale };
-        }
-        else {
+        } else {
             imageSize = { width: scale };
         }
-    }
-    else {
+    } else {
         imageSize = newRect;
     }
 
@@ -252,7 +277,7 @@ export const getCenterPosFromAnchor = (
         imagePosition: newRect,
         imageSize,
     };
-}
+};
 
 export const getCenterPos = (
     scale: number,

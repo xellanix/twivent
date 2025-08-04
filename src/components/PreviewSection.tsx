@@ -146,14 +146,15 @@ const PreviewSection = memo(function PreviewSection({
                 // Clear the back buffer canvas
                 backCtx?.clearRect(0, 0, backCanvas?.width!, backCanvas?.height!);
 
+                const clipArea = twibbon.userPhotoConfig.rect;
                 loaded.reverse().forEach(({ img, pos, w, h, cover }) => {
                     if (cover) {
                         if (box.scale < 0) {
                             const { imagePosition, imageSize } = getCenterPos(
                                 scale,
                                 false,
-                                backCanvas?.width!,
-                                backCanvas?.height!,
+                                clipArea.width,
+                                clipArea.height,
                                 img.width,
                                 img.height
                             );
@@ -170,24 +171,32 @@ const PreviewSection = memo(function PreviewSection({
                         const recalc = getCenterPosFromAnchor(
                             scale / box.scale,
                             false,
-                            backCanvas?.width!,
-                            backCanvas?.height!,
+                            clipArea.width,
+                            clipArea.height,
                             box.width,
                             box.height,
                             box.y + pos.y,
                             box.x + pos.x
                         );
 
+                        backCtx?.save(); // Save the current canvas state
+
+                        // Create and apply the clipping region
+                        backCtx?.beginPath();
+                        backCtx?.rect(clipArea.x, clipArea.y, clipArea.width, clipArea.height);
+                        backCtx?.clip();
+
                         backCtx?.drawImage(
                             img,
-                            recalc.imagePosition.x,
-                            recalc.imagePosition.y,
+                            recalc.imagePosition.x + clipArea.x,
+                            recalc.imagePosition.y + clipArea.y,
                             recalc.imageSize.width!,
                             recalc.imageSize.height!
                         );
+                    } else {
+                        // The other layers (like the frame) are drawn normally without clipping.
+                        backCtx?.drawImage(img, pos.x, pos.y, w, h);
                     }
-
-                    backCtx?.drawImage(img, pos.x, pos.y, w, h);
                 });
 
                 ctx?.clearRect(0, 0, canvas?.width!, canvas?.height!);
@@ -237,7 +246,7 @@ const PreviewSection = memo(function PreviewSection({
                 flex: "35 1 0",
             }}>
             <h4>Preview</h4>
-            <canvas ref={canvasRef} width={width} height={height} style={{ width: "100%" }} />
+            <canvas ref={canvasRef} width={width} height={height} style={{ width: "100%", background: "white" }} />
             <canvas ref={backCanvasRef} width={width} height={height} style={{ display: "none" }} />
             <div className="wrapper-only" style={{ flexDirection: "row" }}>
                 <button
