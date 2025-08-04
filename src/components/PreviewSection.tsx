@@ -193,6 +193,9 @@ const PreviewSection = memo(function PreviewSection({
                             recalc.imageSize.width!,
                             recalc.imageSize.height!
                         );
+
+                        // Restore the canvas to its original state, REMOVING the clip
+                        backCtx?.restore();
                     } else {
                         // The other layers (like the frame) are drawn normally without clipping.
                         backCtx?.drawImage(img, pos.x, pos.y, w, h);
@@ -246,7 +249,12 @@ const PreviewSection = memo(function PreviewSection({
                 flex: "35 1 0",
             }}>
             <h4>Preview</h4>
-            <canvas ref={canvasRef} width={width} height={height} style={{ width: "100%", background: "white" }} />
+            <canvas
+                ref={canvasRef}
+                width={width}
+                height={height}
+                style={{ width: "100%", background: "white" }}
+            />
             <canvas ref={backCanvasRef} width={width} height={height} style={{ display: "none" }} />
             <div className="wrapper-only" style={{ flexDirection: "row" }}>
                 <button
