@@ -63,62 +63,6 @@ export const getLatestTwibbonFolder = async () => {
     return [last.name as string, url];
 };
 
-export const getAllLayers = async (folder: string): Promise<TwibbonHeader> => {
-    const response = await fetch(folder);
-    const data: Array<any> = await response.json();
-
-    let metadataUrl = "";
-
-    const reduced = data.reduce<Array<[string, string]>>(
-        (filtered, item: { name: string; type: string; download_url: string }) => {
-            const filename = item.name.match(/^[^.]+/);
-
-            if (filename && item.type === "file") {
-                const fn = filename[0];
-
-                const int = parseInt(fn.replace(/\D/g, ""), 10);
-                if (!isNaN(int) && int > twibbon.totalLayer) twibbon.totalLayer = int;
-
-                if (fn === "metadata") {
-                    metadataUrl = item.download_url;
-
-                    return filtered;
-                }
-
-                return filtered.concat([[fn, item.download_url]]);
-            }
-
-            return filtered;
-        },
-        []
-    );
-
-    const metadata = await (await fetch(metadataUrl)).json();
-    twibbon.width = metadata.width;
-    twibbon.height = metadata.height;
-    twibbon.caption = metadata.caption ?? null;
-
-    const _mRectConfig = metadata?.userPhotoConfig?.rect || undefined;
-    twibbon.userPhotoConfig.rect = {
-        x: _mRectConfig?.x || 0,
-        y: _mRectConfig?.y || 0,
-        width: _mRectConfig?.width || twibbon.width,
-        height: _mRectConfig?.height || twibbon.height,
-    };
-
-    controllerData.height =
-        (controllerData.width * twibbon.userPhotoConfig.rect.height) /
-        twibbon.userPhotoConfig.rect.width;
-    controllerData.scale = twibbon.width / controllerData.width;
-
-    twibbon.sources = new Map(reduced);
-
-    return {
-        title: metadata.title,
-        subtitle: metadata.subtitle,
-    };
-};
-
 export const getAllLatestTwibbonLayers = async () => {
     const folderData = await getLatestTwibbonFolder();
     return getAllLayersWithRaw(folderData[0]);
@@ -156,6 +100,7 @@ export const getAllLayersWithRaw = async (
     controllerData.scale = twibbon.width / controllerData.width;
 
     const totalLayer = metadata.lastLayerIndex;
+    const skipLayerIndexes: number[] = metadata.skipLayerIndexes || [];
 
     progressHandler && progressHandler(1, 1 + totalLayer * 3);
 
@@ -181,10 +126,11 @@ export const getAllLayersWithRaw = async (
     };
 
     let mapped = new Map<string, string>();
-    for (let i = 0; i < totalLayer; i++) {
-        const status = await getStatus(i + 1);
+    for (let i = 1; i <= totalLayer; i++) {
+        if (skipLayerIndexes.includes(i)) continue;
 
-        status && mapped.set(`layer${i + 1}`, status);
+        const status = await getStatus(i);
+        status && mapped.set(`layer${i}`, status);
     }
 
     twibbon.sources = mapped;
