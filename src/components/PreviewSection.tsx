@@ -6,6 +6,7 @@ import { usePopup } from "xellanix-react";
 import { Position } from "./SharedTypes.tsx";
 import { getCenterPos, getCenterPosFromAnchor, twibbon } from "./SharedFunc.tsx";
 import CaptionPopup from "./popups/CaptionPopup.tsx";
+import { generateTimeName } from "../lib/utils.ts";
 // assets
 // local assets
 // styles
@@ -224,7 +225,7 @@ const PreviewSection = memo(function PreviewSection({
         if (dataURL) {
             const a = document.createElement("a");
             a.href = dataURL;
-            a.download = "twivent.png";
+            a.download = generateTimeName("twivent", "png");
             a.click();
         }
     }, []);
