@@ -3,7 +3,7 @@
 import React, { memo, useCallback, useEffect, useState, useRef } from "react";
 import { IconX, IconReload, IconArrowsMove, IconUpload, IconPhoto } from "@tabler/icons-react";
 import { AspectRatio } from "react-aspect-ratio";
-import { InfoBox, InfoStatus, Slider, SliderInput } from "xellanix-react";
+import { InfoBox, InfoStatus, Slider, SliderInput, useSlider } from "xellanix-react";
 // local components
 import { Position } from "./SharedTypes.tsx";
 import {
@@ -301,7 +301,7 @@ export const ProcessFileZone = memo(function ProcessFileZone({
     setImagePos: React.Dispatch<React.SetStateAction<Position>>;
 }) {
     const controllerRef = useRef<HTMLImageElement>(null);
-    const scaleSliderInputRef = useRef<HTMLInputElement>(null);
+    const scaleSliderInputRef = useSlider();
 
     const [draggedPos, setDraggedPos] = useState<Position>({ x: 0, y: 0 });
 
