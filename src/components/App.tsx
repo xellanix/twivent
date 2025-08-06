@@ -17,6 +17,7 @@ import {
 } from "./SharedFunc.tsx";
 import ProgressBar, { Progress } from "./ProgressBar.tsx";
 import AnalizeImage from "./AnalizeImage.tsx";
+import { init } from "../workers/workerService.ts";
 // assets
 // local assets
 // styles
@@ -36,14 +37,6 @@ function App() {
     const [loadProgress, setLoadProgress] = useState<Progress>({ current: 0, max: 0 });
     const [loadMessage, setLoadMessage] = useState("Loading...");
 
-    const processFiles = useCallback(
-        ({ title, subtitle }: { title: string; subtitle: string }) => {
-            setTitle(title);
-            setSubtitle(subtitle);
-        },
-        [setTitle, setSubtitle]
-    );
-
     const updateProgress = useCallback(
         (current?: number, max?: number) => {
             setLoadProgress((prev: Progress) => ({
@@ -51,7 +44,18 @@ function App() {
                 max: prev.max + (max ?? 0),
             }));
         },
-        [setLoadProgress]
+        []
+    );
+
+    const processFiles = useCallback(
+        ({ title, subtitle }: { title: string; subtitle: string }) => {
+            setLoadMessage("Processing header...");
+            updateProgress(0, 1);
+            setTitle(title);
+            setSubtitle(subtitle);
+            updateProgress(1);
+        },
+        []
     );
 
     useEffect(() => {
@@ -65,6 +69,12 @@ function App() {
 
         getLayers
             .then(processFiles)
+            .then(async () => {
+                setLoadMessage("Initializing face detector...");
+                updateProgress(0, 1);
+                await init();
+                updateProgress(1);
+            })
             .then(() => delay(1000))
             .then(() => setLoaded(true));
     }, []);

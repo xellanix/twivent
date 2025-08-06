@@ -4,7 +4,8 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 // local components
 import { pageUrl, controllerData, getCenterPos } from "./SharedFunc";
-import faceDetectionWorker from "../faceDetectionWorker?worker";
+import { detect } from "../workers/workerService"; // Import from the new service
+
 import { Position } from "./SharedTypes";
 // assets
 // local assets
@@ -108,6 +109,51 @@ const analyzeScalePos = (
     return [faceScale, { x: posX, y: posY }];
 };
 
+// Helper function to convert a File to ImageData
+const fileToImageData = (file: File): Promise<ImageData> => {
+    return new Promise((resolve, reject) => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        const image = new Image();
+        image.src = URL.createObjectURL(file);
+
+        image.onload = () => {
+            if (!ctx) {
+                return reject(new Error("Failed to get canvas context"));
+            }
+
+            const MAX_DIMENSION = 600;
+            if (image.width < image.height) {
+                if (image.width >= MAX_DIMENSION) {
+                    canvas.width = MAX_DIMENSION;
+                    canvas.height = (MAX_DIMENSION * image.height) / image.width;
+                } else {
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                }
+            } else {
+                if (image.height >= MAX_DIMENSION) {
+                    canvas.width = (MAX_DIMENSION * image.width) / image.height;
+                    canvas.height = MAX_DIMENSION;
+                } else {
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                }
+            }
+
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(image.src); // Clean up memory
+            resolve(imageData);
+        };
+
+        image.onerror = (err) => {
+            URL.revokeObjectURL(image.src);
+            reject(err);
+        };
+    });
+};
+
 export default function AnalizeImage({
     file,
     setImageScale,
@@ -119,78 +165,53 @@ export default function AnalizeImage({
     setImagePos: Dispatch<SetStateAction<Position>>;
     setStep: Dispatch<SetStateAction<number>>;
 }) {
-    const [worker, setWorker] = useState<Worker | null>(null);
+    const [status, setStatus] = useState<string>("Analyzing...");
 
     useEffect(() => {
-        const newWorker = new faceDetectionWorker();
-        newWorker.onmessage = (event) => {
-            const faces: FaceData[] = event.data.faces;
-            const imageWidth = event.data.width;
-            const imageHeight = event.data.height;
+        const analyze = async () => {
+            if (!file) return;
 
-            if (faces.length > 0) {
-                const face = addPaddingToFace(faces[0], 3.5);
-                const [faceScale, facePos] = analyzeScalePos(imageWidth, imageHeight, face);
+            try {
+                // Convert the file to ImageData
+                setStatus("Preparing image...");
+                const imageData = await fileToImageData(file);
 
-                if (faceScale <= 500) {
-                    const posX = Math.round(-controllerData.scale * facePos.x);
-                    const posY = Math.round(-controllerData.scale * facePos.y);
+                // Send to worker for detection
+                setStatus("Analyzing for faces...");
+                const faces: FaceData[] = await detect(imageData);
 
-                    setImagePos({ x: posX, y: posY });
-                    setImageScale(faceScale);
-                }
-            }
+                setStatus("Processing face area...");
+                if (faces.length > 0) {
+                    const face = addPaddingToFace(faces[0], 3.5);
+                    const [faceScale, facePos] = analyzeScalePos(
+                        imageData.width,
+                        imageData.height,
+                        face
+                    );
 
-            setStep(2);
-        };
-        setWorker(newWorker);
+                    if (faceScale <= 500) {
+                        const posX = Math.round(-controllerData.scale * facePos.x);
+                        const posY = Math.round(-controllerData.scale * facePos.y);
 
-        return () => {
-            if (worker) {
-                worker.terminate();
-            }
-        };
-    }, []);
-
-    useEffect(() => {
-        const processBase64Image = (src: File) => {
-            if (!worker || !src) return;
-
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            const image = new Image();
-            image.src = URL.createObjectURL(src);
-            image.onload = () => {
-                if (ctx) {
-                    if (image.width < image.height) {
-                        if (image.width >= 600) {
-                            canvas.width = 600;
-                            canvas.height = (600 * image.height) / image.width;
-                        } else {
-                            canvas.width = image.width;
-                            canvas.height = image.height;
-                        }
-                    } else {
-                        if (image.height >= 600) {
-                            canvas.width = (600 * image.width) / image.height;
-                            canvas.height = 600;
-                        } else {
-                            canvas.width = image.width;
-                            canvas.height = image.height;
-                        }
+                        setImagePos({ x: posX, y: posY });
+                        setImageScale(faceScale);
                     }
-
-                    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    URL.revokeObjectURL(image.src);
-                    worker.postMessage({ imageData });
                 }
-                URL.revokeObjectURL(image.src);
-            };
+
+                setStep(2);
+            } catch (error) {
+                if (error instanceof Error) {
+                    if (error.message === "Another detection is already in progress.") {
+                        return;
+                    }
+                }
+                console.error("An error occurred during analysis:", error);
+                setStep(2);
+            }
         };
 
-        processBase64Image(file);
-    }, [worker]);
+        analyze();
+    }, [file]); 
 
     return (
         <div className="vertical-layout flex-align-center">
@@ -200,7 +221,7 @@ export default function AnalizeImage({
                 loop
                 style={{ width: "var(--airplane-max-width)" }}
             />
-            <label className="progress-label">Analyzing...</label>
+            <label className="progress-label">{status}</label>
         </div>
     );
 }
