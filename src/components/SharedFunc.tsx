@@ -266,4 +266,30 @@ export function isSamePosition(pos1: Position, pos2: Position): boolean {
     return pos1.x === pos2.x && pos1.y === pos2.y;
 }
 
+/**
+ * Calculates the dimensions for `rectToScale` to fit entirely inside `rectToContain`
+ * while preserving its aspect ratio.
+ *
+ * @param rectToContain The rectangle to act as the container.
+ * @param rectToScale The rectangle to be scaled.
+ * @returns A new `Size` with the calculated dimensions.
+ */
+export const getContainDimensions = (rectToContain: Size, rectToScale: Size): Size => {
+  // Calculate how much we'd need to scale to match width and height independently
+  const scaleX = rectToContain.width / rectToScale.width;
+  const scaleY = rectToContain.height / rectToScale.height;
+
+  // To fit inside, we must use the SMALLER of the two scale factors
+  const scale = Math.min(scaleX, scaleY);
+
+  // Apply the scaling factor to the original dimensions of the rectangle to scale
+  const newWidth = rectToScale.width * scale;
+  const newHeight = rectToScale.height * scale;
+
+  return {
+    width: newWidth,
+    height: newHeight,
+  };
+};
+
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
